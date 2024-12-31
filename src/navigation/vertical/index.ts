@@ -9,6 +9,17 @@ const navigation = (): VerticalNavItemsType => {
       path: '/home'
     },
     {
+      icon: 'bx:home-circle',
+      title: 'Quản lý',
+      children: [
+        {
+          title: 'Quản lý ví tổng',
+          icon: 'bx:envelope',
+          path: '/crypto-management'
+        }
+      ]
+    },
+    {
       icon: 'bx:customize',
       title: 'Giao dịch ngay',
       children: [
@@ -42,26 +53,26 @@ const navigation = (): VerticalNavItemsType => {
     {
       icon: 'bx:grid-alt',
       title: 'Trang cá nhân',
-     children: [
-      {
-        title: 'Bảo mật',
-         path: '/user-profile/security'
-       },
+      children: [
+        {
+          title: 'Bảo mật',
+          path: '/user-profile/security'
+        },
 
-       {
-        title: 'Danh mục lưu trữ',
-        path: '/user-profile/account'
+        {
+          title: 'Danh mục lưu trữ',
+          path: '/user-profile/account'
 
-       },
-       {
-        title: 'Lịch sử giao dịch',
-         path: '/user-profile/billing-plan/'
-       },
-       {
-        title: 'Thông tin',
-         path: '/user-profile/notification/'
-       }
-     ]
+        },
+        {
+          title: 'Lịch sử giao dịch',
+          path: '/user-profile/billing-plan/'
+        },
+        {
+          title: 'Thông tin',
+          path: '/user-profile/notification/'
+        }
+      ]
     },
     {
       title: 'Blog',
