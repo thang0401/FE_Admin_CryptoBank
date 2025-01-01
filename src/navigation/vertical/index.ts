@@ -22,6 +22,11 @@ const navigation = (): VerticalNavItemsType => {
           icon: 'bx:envelope',
           path: '/customer-management'
         },
+        {
+          title: 'Quản lý giao dịch',
+          icon: 'bx:envelope',
+          path: '/transactions-management'
+        }
       ]
     },
     {

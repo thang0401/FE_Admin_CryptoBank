@@ -20,9 +20,10 @@ import {
   Card,
   CardContent,
   Menu,
-  MenuItem
+  MenuItem,
+  Tooltip
 } from '@mui/material';
-import { EditIcon, EllipsisVerticalIcon as MoreVertIcon, SearchIcon, GiftIcon, WalletIcon, BellIcon, ShieldIcon, MapPinIcon } from 'lucide-react';
+import { EditIcon, EllipsisVerticalIcon as MoreVertIcon, SearchIcon, GiftIcon, WalletIcon, BellIcon, ShieldIcon, MapPinIcon, Copy } from 'lucide-react';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -93,7 +94,8 @@ const CustomerDetails = () => {
     pointsToNextTier: 3000,
     totalTransactions: 663,
     totalSpent: 2404.19,
-    avatar: '/api/placeholder/150/150'
+    avatar: '/api/placeholder/150/150',
+    subWallet: '26Mt8e5sYdpMs3X7RpTpSKCfAwss71GR3wnKmUmyvaWk'
   };
 
 
@@ -116,8 +118,8 @@ const CustomerDetails = () => {
       </Box>
 
       {/* Navigation Tabs */}
-      <Tabs 
-        value={tabValue} 
+      <Tabs
+        value={tabValue}
         onChange={(_, newValue) => setTabValue(newValue)}
         sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
       >
@@ -156,7 +158,7 @@ const CustomerDetails = () => {
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">Status:</Typography>
-                    <Chip 
+                    <Chip
                       label={customerData.status}
                       color="success"
                       size="small"
@@ -170,6 +172,31 @@ const CustomerDetails = () => {
                   <Box>
                     <Typography variant="caption" color="text.secondary">Country:</Typography>
                     <Typography>{customerData.country}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Sub wallet:</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <Typography 
+                        sx={{ 
+                          wordBreak: 'break-all', 
+                          mr: 1,
+                          flex: 1
+                        }}
+                      >
+                        {customerData.subWallet}
+                      </Typography>
+                      <Tooltip title="Copy to clipboard">
+                        <IconButton
+                          onClick={() => {
+                            navigator.clipboard.writeText(customerData.subWallet);
+                          }}
+                          size="small"
+                        >
+                          <Copy fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </Box>
                 </Box>
                 {/* <Button 
@@ -210,7 +237,7 @@ const CustomerDetails = () => {
                     <GiftIcon className="w-5 h-5 mr-2" />
                     <Typography variant="h6">Loyalty Program</Typography>
                   </Box>
-                  <Chip 
+                  <Chip
                     label={customerData.loyaltyTier}
                     color="success"
                     sx={{ mb: 1 }}
@@ -262,8 +289,8 @@ const CustomerDetails = () => {
                               label={transaction.status}
                               color={
                                 transaction.status === 'Completed' ? 'success' :
-                                transaction.status === 'Pending' ? 'warning' :
-                                'info'
+                                  transaction.status === 'Pending' ? 'warning' :
+                                    'info'
                               }
                               size="small"
                             />
