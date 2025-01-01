@@ -16,7 +16,12 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Quản lý ví tổng',
           icon: 'bx:envelope',
           path: '/crypto-management'
-        }
+        },
+        {
+          title: 'Quản lý khách hàng',
+          icon: 'bx:envelope',
+          path: '/customer-management'
+        },
       ]
     },
     {
@@ -87,7 +92,7 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Khác ',
       icon: 'bx:dots-horizontal-rounded',
-      path: '/others'
+      path: '/test-ui'
     }
   ]
 }

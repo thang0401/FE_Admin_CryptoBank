@@ -84,6 +84,7 @@
     "tailwind": "^4.0.0",
     "tailwindcss-animate": "^1.0.7",
     "twind": "^0.16.19",
+    "xlsx": "^0.18.5",
     "yup": "^1.0.2"
   },
   "devDependencies": {
