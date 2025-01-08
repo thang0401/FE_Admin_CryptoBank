@@ -1,14 +1,10 @@
 import React from 'react'
-import CustomerDetails from 'src/components/customer/CustomerDetails'
-import RoleManagement from 'src/components/roles/RoleManagement'
-import TransactionManagement from 'src/components/transaction/TransactionManagement'
-import UserManagement from 'src/components/user/UserManagement'
 
-const index = () => {
+export default function TestUI() {
   return (
-    // <UserManagement/>
-   <RoleManagement/>
+    <div>
+      <h1>1</h1>
+    </div>
   )
 }
 
-export default index
