@@ -27,6 +27,18 @@ const navigation = (): VerticalNavItemsType => {
           icon: 'bx:envelope',
           path: '/transactions-management'
         }
+        ,
+        {
+          title: 'Quản lý nhân viên',
+          icon: 'bx:envelope',
+          path: '/user-management'
+        }
+        ,
+        {
+          title: 'Quản lý role',
+          icon: 'bx:envelope',
+          path: '/role-management'
+        }
       ]
     },
     {
