@@ -34,7 +34,7 @@ const AuthGuard = (props: AuthGuardProps) => {
         }
       }
     },
-    //+ eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [router.route]
   )
 

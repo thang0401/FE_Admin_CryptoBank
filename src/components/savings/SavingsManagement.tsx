@@ -87,47 +87,6 @@ const SavingsManagement: React.FC = () => {
   const [filteredAccounts, setFilteredAccounts] = useState<SavingsAccount[]>([])
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
 
-  // Mock data
-  const mockAccounts: SavingsAccount[] = [
-    {
-      id: "SAV123",
-      status: "active",
-      heirStatus: "no_heir",
-      owner: {
-        id: "USR456",
-        name: "Nguyen Van A",
-        email: "john@example.com",
-        phone: "+1234567890",
-      },
-      term: "12 months",
-      startDate: "2024-02-24",
-      endDate: "2025-02-24",
-      balance: "50 USDC",
-      supportStaff: "Staff01",
-      contractUrl: "",
-      googleDriveUrl: "",
-    },
-    {
-      id: "SAV124",
-      status: "pending",
-      heirStatus: "has_heir",
-      owner: {
-        id: "USR457",
-        name: "Nguyen Van B",
-        email: "jane@example.com",
-        phone: "+1234567891",
-      },
-      term: "6 months",
-      startDate: "2024-02-25",
-      endDate: "2024-08-25",
-      balance: "3 USDC",
-      supportStaff: "Staff02",
-      contractUrl: "",
-      googleDriveUrl: "",
-    },
-  ]
-
-  // Handlers
   const handleFilterChange = (field: keyof Filters, value: any) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
   }
@@ -226,7 +185,47 @@ const SavingsManagement: React.FC = () => {
 
   // Add filter function
   const applyFilters = useCallback(() => {
-    let filtered = mockAccounts
+    // Move mockAccounts inside the callback
+    const mockAccounts: SavingsAccount[] = [
+      {
+        id: "SAV123",
+        status: "active",
+        heirStatus: "no_heir",
+        owner: {
+          id: "USR456",
+          name: "Nguyen Van A",
+          email: "john@example.com",
+          phone: "+1234567890",
+        },
+        term: "12 months",
+        startDate: "2024-02-24",
+        endDate: "2025-02-24",
+        balance: "50 USDC",
+        supportStaff: "Staff01",
+        contractUrl: "",
+        googleDriveUrl: "",
+      },
+      {
+        id: "SAV124",
+        status: "pending",
+        heirStatus: "has_heir",
+        owner: {
+          id: "USR457",
+          name: "Nguyen Van B",
+          email: "jane@example.com",
+          phone: "+1234567891",
+        },
+        term: "6 months",
+        startDate: "2024-02-25",
+        endDate: "2024-08-25",
+        balance: "3 USDC",
+        supportStaff: "Staff02",
+        contractUrl: "",
+        googleDriveUrl: "",
+      },
+    ]
+
+    let filtered: SavingsAccount[] = mockAccounts
 
     if (filters.userName) {
       filtered = filtered.filter((account) => account.owner.name.toLowerCase().includes(filters.userName.toLowerCase()))
@@ -245,7 +244,7 @@ const SavingsManagement: React.FC = () => {
     }
 
     setFilteredAccounts(filtered)
-  }, [filters])
+  }, [filters]);
 
   // Add useEffect to apply filters
   useEffect(() => {
