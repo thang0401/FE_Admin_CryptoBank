@@ -38,6 +38,11 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Quản lý role',
           icon: 'bx:envelope',
           path: '/role-management'
+        },
+        {
+          title: 'Quản lý tiết kiệm',
+          icon: 'bx:envelope',
+          path: '/savings-management'
         }
       ]
     },
