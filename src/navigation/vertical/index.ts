@@ -5,42 +5,42 @@ const navigation = (): VerticalNavItemsType => {
   return [
     {
       icon: 'bx:home-circle',
-      title: 'Trang chủ',
+      title: 'Home',
       path: '/home'
     },
     {
       icon: 'bx:home-circle',
-      title: 'Quản lý',
+      title: 'Management',
       children: [
         {
-          title: 'Quản lý ví tổng',
+          title: 'Wallet Management',
           icon: 'bx:envelope',
           path: '/crypto-management'
         },
         {
-          title: 'Quản lý khách hàng',
+          title: 'Customer Management',
           icon: 'bx:envelope',
           path: '/customer-management'
         },
         {
-          title: 'Quản lý giao dịch',
+          title: 'Transaction Management',
           icon: 'bx:envelope',
           path: '/transactions-management'
         }
         ,
         {
-          title: 'Quản lý nhân viên',
+          title: 'Employee Management',
           icon: 'bx:envelope',
           path: '/user-management'
         }
         ,
         {
-          title: 'Quản lý role',
+          title: 'Role Management',
           icon: 'bx:envelope',
           path: '/role-management'
         },
         {
-          title: 'Quản lý tiết kiệm',
+          title: 'Savings Management',
           icon: 'bx:envelope',
           path: '/savings-management'
         }
@@ -49,24 +49,24 @@ const navigation = (): VerticalNavItemsType => {
 
     {
       icon: 'bx:grid-alt',
-      title: 'Trang cá nhân',
+      title: 'Profile',
       children: [
         {
-          title: 'Bảo mật',
+          title: 'Security',
           path: '/user-profile/security'
         },
 
         {
-          title: 'Danh mục lưu trữ',
+          title: 'Saved Categories',
           path: '/user-profile/account'
 
         },
+        // {
+        //   title: 'Lịch sử giao dịch',
+        //   path: '/user-profile/billing-plan/'
+        // },
         {
-          title: 'Lịch sử giao dịch',
-          path: '/user-profile/billing-plan/'
-        },
-        {
-          title: 'Thông tin',
+          title: 'Information',
           path: '/user-profile/notification/'
         }
       ]
