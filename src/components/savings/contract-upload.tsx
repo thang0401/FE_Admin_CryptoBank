@@ -24,8 +24,8 @@ const ContractUpload: React.FC<ContractUploadProps> = ({ onUploadComplete }) => 
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [folderId, setFolderId] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null) 
-  const [isSuccess, setIsSuccess] = useState<boolean | null>(null) 
+  const [message, setMessage] = useState<string | null>(null)
+  const [isSuccess, setIsSuccess] = useState<boolean | null>(null)
 
 
   useEffect(() => {
@@ -163,7 +163,7 @@ const ContractUpload: React.FC<ContractUploadProps> = ({ onUploadComplete }) => 
             />
             <label htmlFor="contract-file-input">
               <Button variant="outlined" component="span" startIcon={<UploadIcon />} disabled={!folderId}>
-              Select: 
+              Select:
               </Button>
             </label>
 
