@@ -214,10 +214,11 @@ const AccountDetails: React.FC = () => {
       } else {
         mockAccounts.push({ ...editedAccount, startDate: editedAccount.startDate, endDate: editedAccount.endDate })
       }
-    } catch (error) {
+    }catch (error) {
       console.error('Error submitting to contract:', error)
-      setSuccessMessage('Failed to save changes: ' + (error.message || 'Unknown error'))
-    } finally {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      setSuccessMessage('Failed to save changes: ' + (errorMessage || 'Unknown error'))
+    }finally {
       setConfirmDialogOpen(false)
       setHasChanges(false)
       setIsSubmitting(false)

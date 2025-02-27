@@ -40,7 +40,6 @@
     "@mui/x-date-pickers": "^7.27.0",
     "@popperjs/core": "^2.11.6",
     "@preact/signals-react": "^2.2.0",
-    "@privy-io/react-auth": "^2.5.0",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^1.9.3",
     "@solana/spl-token": "^0.4.8",

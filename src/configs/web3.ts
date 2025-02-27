@@ -529,7 +529,7 @@ export const getContractWithSigner = async (): Promise<any> => {
       // Yêu cầu quyền truy cập ví
       await window.ethereum.request({ method: "eth_requestAccounts" });
       return new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error("Failed to connect to MetaMask: " + error.message);
     }
   }
