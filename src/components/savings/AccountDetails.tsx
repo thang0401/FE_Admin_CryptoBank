@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import type React from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
 import {
   Box,
@@ -17,12 +18,11 @@ import {
   DialogContent,
   DialogActions,
   Alert,
-  LinearProgress,
   DialogContentText,
 } from "@mui/material"
 import { styled } from "@mui/material/styles"
-import UploadIcon from "@mui/icons-material/Upload"
-import { format } from "date-fns" 
+import { format } from "date-fns"
+import ContractUpload from "./contract-upload"
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -43,53 +43,50 @@ interface SavingsAccount {
   googleDriveUrl: string
 }
 
-
 const formatDate = (dateString: string) => {
   return format(new Date(dateString), "dd/MM/yyyy")
 }
-
+const mockAccounts: SavingsAccount[] = [
+  {
+    id: "SAV001",
+    status: "active",
+    heirStatus: "no_heir",
+    owner: { id: "USRER001", name: "Nguyen Van Thuan", email: "thuannv.it@gmail.com", phone: "+8434567890" },
+    term: "12 months",
+    startDate: "2024-02-24",
+    endDate: "2025-02-24",
+    balance: "50 USDC",
+    supportStaff: "Staff01",
+    contractUrl: "",
+    googleDriveUrl: "",
+  },
+  {
+    id: "SAV002",
+    status: "pending",
+    heirStatus: "has_heir",
+    owner: { id: "USRER002", name: "Tran Huu Luan", email: "luantr@gmail.com", phone: "+8434567891" },
+    term: "6 months",
+    startDate: "2024-02-25",
+    endDate: "2024-08-25",
+    balance: "3 USDC",
+    supportStaff: "Staff02",
+    contractUrl: "",
+    googleDriveUrl: "",
+  },
+]
 const AccountDetails: React.FC = () => {
   const router = useRouter()
   const { id } = router.query
 
   const [editedAccount, setEditedAccount] = useState<SavingsAccount | null>(null)
-  const [uploadProgress, setUploadProgress] = useState<number>(0)
-  const [isUploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-
+  const [successMessage, setSuccessMessage] = useState("")
+  const [showSnackbar, setShowSnackbar] = useState(false)
   useEffect(() => {
     if (!id) return
 
-    const mockAccounts: SavingsAccount[] = [
-      {
-        id: "SAV001",
-        status: "active",
-        heirStatus: "no_heir",
-        owner: { id: "USRER001", name: "Nguyen Van Thuan", email: "thuannv.it@gmail.com", phone: "+8434567890" },
-        term: "12 months",
-        startDate: "2024-02-24",
-        endDate: "2025-02-24",
-        balance: "50 USDC",
-        supportStaff: "Staff01",
-        contractUrl: "",
-        googleDriveUrl: "",
-      },
-      {
-        id: "SAV002",
-        status: "pending",
-        heirStatus: "has_heir",
-        owner: { id: "USRER002", name: "Tran Huu Luan", email: "luantr@gmail.com", phone: "+8434567891" },
-        term: "6 months",
-        startDate: "2024-02-25",
-        endDate: "2024-08-25",
-        balance: "3 USDC",
-        supportStaff: "Staff02",
-        contractUrl: "",
-        googleDriveUrl: "",
-      },
-    ]
+
     const account = mockAccounts.find((acc) => acc.id === id)
     setEditedAccount(account || null)
   }, [id])
@@ -101,7 +98,7 @@ const AccountDetails: React.FC = () => {
         const ownerField = field.split(".")[1]
         updatedAccount.owner = { ...updatedAccount.owner, [ownerField]: value }
       } else {
-        ;(updatedAccount as any)[field] = value
+        ; (updatedAccount as any)[field] = value
       }
       setEditedAccount(updatedAccount)
       setHasChanges(true)
@@ -113,37 +110,28 @@ const AccountDetails: React.FC = () => {
       setConfirmDialogOpen(true)
     }
   }
-
   const handleConfirmSubmit = () => {
-    console.log("Saving changes:", editedAccount)
+    // Cập nhật thông tin người dùng trong mock database
+    if (editedAccount) {
+      const accountIndex = mockAccounts.findIndex(acc => acc.id === editedAccount.id)
+      if (accountIndex !== -1) {
+        mockAccounts[accountIndex] = { ...editedAccount }
+        
+        // Hiển thị thông báo thành công
+        setSuccessMessage("Account information has been updated successfully!")
+        setShowSnackbar(true)
+        // console.log("Đã cập nhật thành công:", editedAccount)
+      }
+    }
+    
     setConfirmDialogOpen(false)
     setHasChanges(false)
   }
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setUploadedFile(file)
-    setUploadProgress(0)
-
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          return 100
-        }
-        return prev + 10
-      })
-    }, 500)
-  }
-
-  const handleUploadComplete = () => {
-    if (uploadedFile && editedAccount) {
-      const fileUrl = URL.createObjectURL(uploadedFile)
-      handleInputChange("contractUrl", fileUrl)
-      setUploadDialogOpen(false)
-      setUploadProgress(0)
+  const handleUploadComplete = (localFileUrl: string, driveUrl: string) => {
+    if (editedAccount) {
+      handleInputChange("contractUrl", localFileUrl)
+      handleInputChange("googleDriveUrl", driveUrl)
     }
   }
 
@@ -201,12 +189,7 @@ const AccountDetails: React.FC = () => {
               <Paper sx={{ p: 2 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Account ID"
-                      value={editedAccount.id}
-                      InputProps={{ readOnly: true }}
-                    />
+                    <TextField fullWidth label="Account ID" value={editedAccount.id} InputProps={{ readOnly: true }} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -228,7 +211,7 @@ const AccountDetails: React.FC = () => {
                     <TextField
                       fullWidth
                       label="End Date"
-                      value={formatDate(editedAccount.endDate)} // 
+                      value={formatDate(editedAccount.endDate)}
                       onChange={(e) => handleInputChange("endDate", e.target.value)}
                     />
                   </Grid>
@@ -247,6 +230,7 @@ const AccountDetails: React.FC = () => {
                       value={editedAccount.googleDriveUrl}
                       onChange={(e) => handleInputChange("googleDriveUrl", e.target.value)}
                       placeholder="No URL provided"
+                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
                 </Grid>
@@ -268,12 +252,7 @@ const AccountDetails: React.FC = () => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="ID"
-                      value={editedAccount.owner.id}
-                      InputProps={{ readOnly: true }}
-                    />
+                    <TextField fullWidth label="ID" value={editedAccount.owner.id} InputProps={{ readOnly: true }} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -300,17 +279,18 @@ const AccountDetails: React.FC = () => {
                 <Typography variant="subtitle1" gutterBottom>
                   Contract Document
                 </Typography>
-                <Box sx={{ mb: 2 }}>
-                  <Button variant="contained" startIcon={<UploadIcon />} onClick={() => setUploadDialogOpen(true)}>
-                    Upload Contract
-                  </Button>
-                </Box>
+                <ContractUpload onUploadComplete={handleUploadComplete} />
                 {editedAccount.contractUrl && (
                   <Alert severity="success">
                     Contract uploaded successfully.
                     <Button color="inherit" size="small" href={editedAccount.contractUrl} target="_blank">
                       View Contract
                     </Button>
+                    {editedAccount.googleDriveUrl && (
+                      <Button color="inherit" size="small" href={editedAccount.googleDriveUrl} target="_blank">
+                        View on Google Drive
+                      </Button>
+                    )}
                   </Alert>
                 )}
               </Paper>
@@ -342,42 +322,9 @@ const AccountDetails: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Dialog open={isUploadDialogOpen} onClose={() => setUploadDialogOpen(false)}>
-        <DialogTitle>Upload Contract</DialogTitle>
-        <DialogContent>
-          <Box sx={{ my: 2 }}>
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              onChange={handleFileUpload}
-              style={{ display: "none" }}
-              id="contract-file-input"
-            />
-            <label htmlFor="contract-file-input">
-              <Button variant="outlined" component="span" startIcon={<UploadIcon />}>
-                Choose File
-              </Button>
-            </label>
-          </Box>
-          {uploadProgress > 0 && (
-            <Box sx={{ width: "100%", mt: 2 }}>
-              <LinearProgress variant="determinate" value={uploadProgress} />
-              <Typography variant="body2" color="text.secondary" align="center">
-                {uploadProgress}%
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setUploadDialogOpen(false)}>Cancel</Button>
-          <Button color="primary" onClick={handleUploadComplete} disabled={uploadProgress > 0 && uploadProgress < 100}>
-            Upload
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   )
 }
 
 export default AccountDetails
+
