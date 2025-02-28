@@ -31,7 +31,7 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Employee Management',
           icon: 'bx:envelope',
-          path: '/user-management'
+          path: '/employee-management'
         }
         ,
         {

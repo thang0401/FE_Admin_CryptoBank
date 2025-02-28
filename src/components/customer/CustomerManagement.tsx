@@ -28,8 +28,9 @@ import {
     Download as DownloadIcon
 } from '@mui/icons-material';
 import EditCustomerDialog from './EditCustomerDialog';
+import VisibilityIcon from "@mui/icons-material/Visibility"
 import * as XLSX from 'xlsx';
-
+import { useRouter } from "next/router"
 interface Customer {
     id: string;
     first_name: string;
@@ -41,7 +42,7 @@ interface Customer {
     status_id: string;
     created_date: string;
     is_activated: boolean;
-    kyc_status: boolean;
+    kyc_status: string;
     type_siging_in: string;
     modified_by: string;
     modified_date: string;
@@ -61,6 +62,7 @@ const statusOptions = [
 ];
 
 const CustomerManagement = () => {
+    const router = useRouter();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -77,16 +79,16 @@ const CustomerManagement = () => {
     const [customers] = useState<Customer[]>([
         {
             id: 'USR001',
-            first_name: 'John',
-            last_name: 'Doe',
-            email: 'john.doe@example.com',
+            first_name: 'Nguyen Van',
+            last_name: 'Thuan',
+            email: 'thuanv@gmail.com',
             phone_num: '+1234567890',
             id_number: 'ID123456',
             ranking_id: 'R001',
             status_id: 'S001',
             created_date: '2024-01-01T00:00:00',
             is_activated: true,
-            kyc_status: true,
+            kyc_status: "pending",
             type_siging_in: 'email',
             modified_by: 'admin',
             modified_date: '2024-01-01T00:00:00'
@@ -150,12 +152,25 @@ const CustomerManagement = () => {
         return matchUserId && matchRanking && matchPhone && matchName && matchIdCard;
     });
 
+    const handleAccountSelect = (id: string) => {
+        router.push(`/customer-management/${id}`)
+    }
+
     return (
         <Box sx={{ p: 3 }}>
             <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
                 Customer Management
             </Typography>
-
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<DownloadIcon />}
+                    onClick={exportToExcel}
+                >
+                    Export
+                </Button>
+            </Box>
             {/* Filters */}
             <Paper sx={{ p: 2, mb: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -206,16 +221,7 @@ const CustomerManagement = () => {
                 </Box>
             </Paper>
 
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<DownloadIcon />}
-                    onClick={exportToExcel}
-                >
-                    Export
-                </Button>
-            </Box>
+
 
             {/* Data Table */}
             <TableContainer component={Paper}>
@@ -227,13 +233,13 @@ const CustomerManagement = () => {
                             <TableCell>Email</TableCell>
                             <TableCell>Phone</TableCell>
                             <TableCell>ID Number</TableCell>
-                            <TableCell>Ranking</TableCell>
+                            {/* <TableCell>Ranking</TableCell> */}
                             <TableCell>Status</TableCell>
                             <TableCell>Created Date</TableCell>
                             <TableCell>KYC Status</TableCell>
                             <TableCell>Sign-in Type</TableCell>
-                            <TableCell>Last Modified</TableCell>
-                            <TableCell>Modified By</TableCell>
+                            {/* <TableCell>Last Modified</TableCell> */}
+                            {/* <TableCell>Modified By</TableCell> */}
                             <TableCell align="center">Actions</TableCell>
                         </TableRow>
                     </TableHead>
@@ -250,9 +256,9 @@ const CustomerManagement = () => {
                                     <TableCell>{customer.email}</TableCell>
                                     <TableCell>{customer.phone_num}</TableCell>
                                     <TableCell>{customer.id_number}</TableCell>
-                                    <TableCell>
+                                    {/* <TableCell>
                                         {rankingOptions.find(r => r.id === customer.ranking_id)?.label}
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell>
                                         <Chip
                                             label={customer.is_activated ? 'Active' : 'Inactive'}
@@ -263,25 +269,21 @@ const CustomerManagement = () => {
                                     <TableCell>{new Date(customer.created_date).toLocaleDateString()}</TableCell>
                                     <TableCell>
                                         <Chip
-                                            label={customer.kyc_status ? 'Verified' : 'Unverified'}
-                                            color={customer.kyc_status ? 'success' : 'warning'}
+                                            label={customer.kyc_status ? 'Pending' : 'Unverified'}
+                                            color={customer.kyc_status ? 'warning' : 'warning'}
                                             size="small"
                                         />
                                     </TableCell>
                                     <TableCell>{customer.type_siging_in}</TableCell>
-                                    <TableCell>{new Date(customer.modified_date).toLocaleDateString()}</TableCell>
-                                    <TableCell>{customer.modified_by}</TableCell>
+                                    {/* <TableCell>{new Date(customer.modified_date).toLocaleDateString()}</TableCell> */}
+                                    {/* <TableCell>{customer.modified_by}</TableCell> */}
                                     <TableCell align="center">
-                                        <Tooltip title="Edit">
-                                            <IconButton onClick={() => handleEditClick(customer)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                        </Tooltip>
                                         <Tooltip title="Delete">
-                                            <IconButton color="error">
-                                                <DeleteIcon />
+                                            <IconButton onClick={() => handleAccountSelect(customer.id)}>
+                                                <VisibilityIcon />
                                             </IconButton>
                                         </Tooltip>
+
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -297,7 +299,7 @@ const CustomerManagement = () => {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </TableContainer>
-            <EditCustomerDialog
+            {/* <EditCustomerDialog
                 open={editDialogOpen}
                 onClose={() => setEditDialogOpen(false)}
                 customer={selectedCustomer}
@@ -306,7 +308,7 @@ const CustomerManagement = () => {
                     console.log('Updated customer:', updatedCustomer);
                     setEditDialogOpen(false);
                 }}
-            />
+            /> */}
         </Box>
     );
 };

@@ -29,7 +29,7 @@ import {
   Checkbox
 } from '@mui/material'
 import { Users, UserPlus, UserCheck, Clock, FileText, Plus, Eye, Trash2, MoreVertical, Search, HelpCircle, Shield, ClipboardList, Users2, Calculator, Scale, LineChart, Wallet, Lock, Plug, Building2, Code2, Share2, Megaphone } from 'lucide-react'
-import { RoleConfig, User } from 'src/types/user-management/userManagementTypes'
+import { RoleConfig, User } from 'src/types/employee-management/employeeManagementTypes'
 
 
 
@@ -58,7 +58,7 @@ const getRoleConfig = (roleName: string): RoleConfig => {
 
 const BILLING_OPTIONS = ["Auto Debit", "Cash", "Bank Transfer", "Credit Card"]
 
-const UserManagement = () => {
+const EmployeeManagement = () => {
   const [users, setUsers] = useState<User[]>([
     {
       id: "gs",
@@ -497,4 +497,4 @@ const UserManagement = () => {
   )
 }
 
-export default UserManagement
+export default EmployeeManagement

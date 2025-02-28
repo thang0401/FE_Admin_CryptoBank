@@ -91,7 +91,7 @@ const SavingsManagement: React.FC = () => {
   const handleFilterChange = (field: keyof Filters, value: any) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
   }
-
+  // Forwad to details
   const handleAccountSelect = (id: string) => {
     router.push(`/savings-management/${id}`)
   }
