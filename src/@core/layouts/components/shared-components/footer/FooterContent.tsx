@@ -23,7 +23,7 @@ const FooterContent = () => {
       <Typography sx={{ mr: 2 }}>
         {` Made `}
         <Box component='span' sx={{ color: 'error.main' }}></Box>
-        {` by Nguyen Cao Thang Fpoly on Web 3  `}
+        {` by DevConnect FPOLY team on Web 3  `}
         {/* <LinkStyled target='_blank' href='https://themeselection.com/'>
           ThemeSelection
         </LinkStyled> */}
