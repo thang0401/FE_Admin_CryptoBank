@@ -43,6 +43,11 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Savings Management',
           icon: 'bx:envelope',
           path: '/savings-management'
+        },
+        {
+          title: 'Term Management',
+          icon: 'bx:envelope',
+          path: '/term-management'
         }
       ]
     },
