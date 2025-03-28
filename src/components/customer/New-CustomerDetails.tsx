@@ -7,29 +7,26 @@ import {
     Button,
     TextField,
     Grid,
-    Card,
-    CardMedia,
-    CardContent,
     Paper,
-    Chip,
     Divider,
     Stack,
     Avatar,
     IconButton,
     Tooltip,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Chip,
 } from "@mui/material";
 import {
     Save as SaveIcon,
-    CheckCircle as ApproveIcon,
-    Cancel as RejectIcon,
     Assignment as AssignmentIcon,
     ContentCopy as CopyIcon,
-    VisibilityOutlined as ViewIcon,
-    Cancel,
 } from "@mui/icons-material";
 import { useRouter } from "next/router";
 
-// Customer interface
+// Customer interface (unchanged)
 interface Customer {
     id: string;
     fullName: string;
@@ -50,7 +47,7 @@ interface Customer {
     kycStatus: string;
 }
 
-// New mock data
+// Mock data (unchanged)
 const newMockCustomer: Customer = {
     id: "USER001",
     fullName: "Nguyen Van Thuan",
@@ -74,21 +71,12 @@ const newMockCustomer: Customer = {
 const CustomerDetails: React.FC = () => {
     const router = useRouter();
     const [customer, setCustomer] = useState(newMockCustomer);
-    const [imageView, setImageView] = useState<string | null>(null);
 
-    // Handle Approve button
-    const handleApprove = () => {
+    // Handle KYC Status change
+    const handleKycStatusChange = (event: any) => {
         setCustomer((prev) => ({
             ...prev,
-            kycStatus: "Approved",
-        }));
-    };
-
-    // Handle Reject button
-    const handleReject = () => {
-        setCustomer((prev) => ({
-            ...prev,
-            kycStatus: "Rejected",
+            kycStatus: event.target.value,
         }));
     };
 
@@ -97,15 +85,15 @@ const CustomerDetails: React.FC = () => {
         alert("Customer information has been saved!");
     };
 
-    // Function to determine status color
+    // Status color function
     const getStatusColor = (status: string) => {
         switch (status) {
+            case "Active":
+                return "#4CAF50"; // Green
             case "Pending":
-                return "#FF9800";
-            case "Approved":
-                return "#4CAF50";
-            case "Rejected":
-                return "#F44336";
+                return "#FF9800"; // Orange
+            case "Inactive":
+                return "#9E9E9E"; // Grey
             default:
                 return "#9E9E9E";
         }
@@ -113,21 +101,20 @@ const CustomerDetails: React.FC = () => {
 
     const getStatusChip = (status: string) => {
         const statusInfo = {
-            Pending: { color: "warning", icon: <AssignmentIcon fontSize="small" /> },
-            Approved: { color: "success", icon: <ApproveIcon fontSize="small" /> },
-            Rejected: { color: "error", icon: <RejectIcon fontSize="small" /> },
+            Active: { color: "success", label: "Active" },
+            Pending: { color: "warning", label: "Pending" },
+            Inactive: { color: "default", label: "Inactive" },
         };
 
         const info = statusInfo[status as keyof typeof statusInfo] || {
             color: "default",
-            icon: null,
+            label: status,
         };
 
         return (
             <Chip
-                label={status}
+                label={info.label}
                 color={info.color as any}
-                icon={info.icon}
                 sx={{ fontWeight: "bold", ml: 1 }}
             />
         );
@@ -138,26 +125,11 @@ const CustomerDetails: React.FC = () => {
         alert("Copied to clipboard!");
     };
 
-    const openImageView = (url: string) => {
-        setImageView(url);
-    };
-
-    const closeImageView = () => {
-        setImageView(null);
-    };
-
     return (
         <Box sx={{ width: "100%", height: "100%", padding: "0 16px" }}>
             {/* Header */}
             <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                    }}
-                >
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         <Avatar sx={{ bgcolor: "#1976d2", width: 56, height: 56, mr: 2 }}>
                             {customer.fullName.charAt(0)}
@@ -166,186 +138,62 @@ const CustomerDetails: React.FC = () => {
                             <Typography variant="h5" fontWeight="bold">
                                 {customer.fullName}
                             </Typography>
-                            <Typography
-                                variant="body1"
-                                color="text.secondary"
-                                sx={{ fontWeight: "bold", fontSize: "1.2rem" }}
-                            >
+                            <Typography variant="body1" color="text.secondary" sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>
                                 ID: {customer.id}
                             </Typography>
                         </Box>
                     </Box>
                     <Box>
-                        <Typography
-                            variant="subtitle1"
-                            sx={{ display: "flex", alignItems: "center" }}
-                        >
-                            KYC Status: {getStatusChip(customer.kycStatus)}
-                        </Typography>
+                        <FormControl sx={{ minWidth: 150 }}>
+                            <InputLabel>KYC Status</InputLabel>
+                            <Select
+                                value={customer.kycStatus}
+                                label="KYC Status"
+                                onChange={handleKycStatusChange}
+                            >
+                                <MenuItem value="Active">Active</MenuItem>
+                                <MenuItem value="Pending">Pending</MenuItem>
+                                <MenuItem value="Inactive">Inactive</MenuItem>
+                            </Select>
+                        </FormControl>
                     </Box>
                 </Box>
-                {customer.kycStatus === "Pending" && (
-                    <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-                        <Button
-                            variant="contained"
-                            color="success"
-                            startIcon={<ApproveIcon />}
-                            onClick={handleApprove}
-                            sx={{ mr: 1, borderRadius: 2 }}
-                        >
-                            Approve
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="error"
-                            startIcon={<RejectIcon />}
-                            onClick={handleReject}
-                            sx={{ borderRadius: 2 }}
-                        >
-                            Reject
-                        </Button>
-                    </Box>
-                )}
             </Paper>
 
             <Grid container spacing={3}>
-                {/* Personal Information */}
+                {/* Personal Information (unchanged) */}
                 <Grid item xs={12} md={6}>
                     <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-                        <Typography
-                            variant="h6"
-                            fontWeight="bold"
-                            sx={{ mb: 3, display: "flex", alignItems: "center" }}
-                        >
+                        <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, display: "flex", alignItems: "center" }}>
                             Personal Information
                             <Divider sx={{ flex: 1, ml: 2 }} />
                         </Typography>
-
                         <Stack spacing={3}>
                             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <TextField
-                                    label="Last Name"
-                                    value={customer.lastName}
-                                    InputProps={{ readOnly: true }}
-                                    size="small"
-                                    sx={{ width: "48%" }}
-                                />
-                                <TextField
-                                    label="First Name"
-                                    value={customer.firstName}
-                                    InputProps={{ readOnly: true }}
-                                    size="small"
-                                    sx={{ width: "48%" }}
-                                />
+                                <TextField label="First Name" value={customer.lastName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
+                                <TextField label="Middle Name" value={customer.firstName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
+                                <TextField label="Last Name" value={customer.firstName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
                             </Box>
-
                             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <TextField
-                                    label="Gender"
-                                    value={customer.gender}
-                                    InputProps={{ readOnly: true }}
-                                    size="small"
-                                    sx={{ width: "48%" }}
-                                />
-                                <TextField
-                                    label="Date of Birth"
-                                    value={customer.dateOfBirth.split("T")[0]} // Display only date part
-                                    InputProps={{ readOnly: true }}
-                                    size="small"
-                                    sx={{ width: "48%" }}
-                                />
+                                <TextField label="Gender" value={customer.gender} InputProps={{ readOnly: true }} size="small" sx={{ width: "48%" }} />
+                                <TextField label="Date of Birth" value={customer.dateOfBirth.split("T")[0]} InputProps={{ readOnly: true }} size="small" sx={{ width: "48%" }} />
                             </Box>
-
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <TextField
-                                    label="Phone Number"
-                                    value={customer.phone}
-                                    InputProps={{
-                                        readOnly: true,
-                                        endAdornment: (
-                                            <Tooltip title="Copy">
-                                                <IconButton
-                                                    edge="end"
-                                                    size="small"
-                                                    onClick={() => copyToClipboard(customer.phone)}
-                                                >
-                                                    <CopyIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        ),
-                                    }}
-                                    size="small"
-                                    sx={{ width: "48%" }}
-                                />
-                                <TextField
-                                    label="Email"
-                                    value={customer.email}
-                                    InputProps={{
-                                        readOnly: true,
-                                        endAdornment: (
-                                            <Tooltip title="Copy">
-                                                <IconButton
-                                                    edge="end"
-                                                    size="small"
-                                                    onClick={() => copyToClipboard(customer.email)}
-                                                >
-                                                    <CopyIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        ),
-                                    }}
-                                    size="small"
-                                    sx={{ width: "48%" }}
-                                />
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <TextField label="Phone Number" value={customer.phone} InputProps={{ readOnly: true, endAdornment: (
+                                    <Tooltip title="Copy"><IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.phone)}><CopyIcon fontSize="small" /></IconButton></Tooltip>
+                                )}} size="small" sx={{ width: "48%" }} />
+                                <TextField label="Email" value={customer.email} InputProps={{ readOnly: true, endAdornment: (
+                                    <Tooltip title="Copy"><IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.email)}><CopyIcon fontSize="small" /></IconButton></Tooltip>
+                                )}} size="small" sx={{ width: "48%" }} />
                             </Box>
-
                             <Divider textAlign="left">Address Information</Divider>
-
-                            <TextField
-                                label="Address"
-                                value={customer.address}
-                                InputProps={{ readOnly: true }}
-                                size="small"
-                                fullWidth
-                            />
-
+                            <TextField label="Address" value={customer.address} InputProps={{ readOnly: true }} size="small" fullWidth />
                             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <TextField
-                                    label="Province/City"
-                                    value={customer.province}
-                                    InputProps={{ readOnly: true }}
-                                    size="small"
-                                    sx={{ width: "32%" }}
-                                />
-                                <TextField
-                                    label="District"
-                                    value={customer.district}
-                                    InputProps={{ readOnly: true }}
-                                    size="small"
-                                    sx={{ width: "32%" }}
-                                />
-                                <TextField
-                                    label="Ward"
-                                    value={customer.ward}
-                                    InputProps={{ readOnly: true }}
-                                    size="small"
-                                    sx={{ width: "32%" }}
-                                />
+                                <TextField label="Province/City" value={customer.province} InputProps={{ readOnly: true }} size="small" sx={{ width: "32%" }} />
+                                <TextField label="District" value={customer.district} InputProps={{ readOnly: true }} size="small" sx={{ width: "32%" }} />
+                                <TextField label="Ward" value={customer.ward} InputProps={{ readOnly: true }} size="small" sx={{ width: "32%" }} />
                             </Box>
-
-                            <TextField
-                                label="Country"
-                                value={customer.nation}
-                                InputProps={{ readOnly: true }}
-                                size="small"
-                                sx={{ width: "48%" }}
-                            />
+                            <TextField label="Country" value={customer.nation} InputProps={{ readOnly: true }} size="small" sx={{ width: "48%" }} />
                         </Stack>
                     </Paper>
                 </Grid>
@@ -353,11 +201,7 @@ const CustomerDetails: React.FC = () => {
                 {/* Verification Documents (KYC) */}
                 <Grid item xs={12} md={6}>
                     <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-                        <Typography
-                            variant="h6"
-                            fontWeight="bold"
-                            sx={{ mb: 3, display: "flex", alignItems: "center" }}
-                        >
+                        <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, display: "flex", alignItems: "center" }}>
                             Verification Documents (KYC)
                             <Divider sx={{ flex: 1, ml: 2 }} />
                         </Typography>
@@ -373,11 +217,7 @@ const CustomerDetails: React.FC = () => {
                                     readOnly: true,
                                     endAdornment: (
                                         <Tooltip title="Copy">
-                                            <IconButton
-                                                edge="end"
-                                                size="small"
-                                                onClick={() => copyToClipboard(customer.idNumber)}
-                                            >
+                                            <IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.idNumber)}>
                                                 <CopyIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
@@ -388,65 +228,43 @@ const CustomerDetails: React.FC = () => {
                         </Box>
 
                         <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                                <Card sx={{ borderRadius: 2 }}>
-                                    <CardContent sx={{ p: 1, pb: 1 }}>
-                                        <Typography variant="subtitle2" align="center">
-                                            Front of ID
-                                        </Typography>
-                                    </CardContent>
-                                    <Box sx={{ position: "relative" }}>
-                                        <CardMedia
-                                            component="img"
-                                            image={customer.idCardFrontImgUrl}
-                                            alt="Front of ID"
-                                            sx={{ height: 180, objectFit: "cover" }}
-                                        />
-                                        <IconButton
-                                            sx={{
-                                                position: "absolute",
-                                                top: "5px",
-                                                right: "5px",
-                                                bgcolor: "rgba(255, 255, 255, 0.8)",
-                                                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.9)" },
-                                            }}
-                                            size="small"
-                                            onClick={() => openImageView(customer.idCardFrontImgUrl)}
-                                        >
-                                            <ViewIcon fontSize="small" />
-                                        </IconButton>
-                                    </Box>
-                                </Card>
+                            <Grid item xs={12}>
+                                <TextField
+                                    label="Front ID URL"
+                                    value={customer.idCardFrontImgUrl}
+                                    fullWidth
+                                    InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <Tooltip title="Copy">
+                                                <IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.idCardFrontImgUrl)}>
+                                                    <CopyIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ),
+                                    }}
+                                    size="small"
+                                    
+                                />
                             </Grid>
-                            <Grid item xs={6}>
-                                <Card sx={{ borderRadius: 2 }}>
-                                    <CardContent sx={{ p: 1, pb: 1 }}>
-                                        <Typography variant="subtitle2" align="center">
-                                            Back of ID
-                                        </Typography>
-                                    </CardContent>
-                                    <Box sx={{ position: "relative" }}>
-                                        <CardMedia
-                                            component="img"
-                                            image={customer.idCardBackImgUrl}
-                                            alt="Back of ID"
-                                            sx={{ height: 180, objectFit: "cover" }}
-                                        />
-                                        <IconButton
-                                            sx={{
-                                                position: "absolute",
-                                                top: "5px",
-                                                right: "5px",
-                                                bgcolor: "rgba(255, 255, 255, 0.8)",
-                                                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.9)" },
-                                            }}
-                                            size="small"
-                                            onClick={() => openImageView(customer.idCardBackImgUrl)}
-                                        >
-                                            <ViewIcon fontSize="small" />
-                                        </IconButton>
-                                    </Box>
-                                </Card>
+                            <Grid item xs={12}>
+                                <TextField
+                                    label="Back ID URL"
+                                    value={customer.idCardBackImgUrl}
+                                    fullWidth
+                                    InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <Tooltip title="Copy">
+                                                <IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.idCardBackImgUrl)}>
+                                                    <CopyIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ),
+                                    }}
+                                    size="small"
+                                    
+                                />
                             </Grid>
                         </Grid>
 
@@ -462,67 +280,14 @@ const CustomerDetails: React.FC = () => {
             </Grid>
 
             {/* Footer */}
-            <Box display='flex' justifyContent='flex-end' gap={2} sx={{mt: 4}}>
-                <Button variant='outlined' color='secondary' onClick={() => router.push('/customer-management')}>
+            <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 4 }}>
+                <Button variant="outlined" color="secondary" onClick={() => router.push('/customer-management')}>
                     Back
                 </Button>
-                <Button
-                    variant="contained"
-                    startIcon={<SaveIcon />}
-                    onClick={handleSave}
-                    sx={{ borderRadius: 2 }}
-                >
-                    Save Information
+                <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSave} sx={{ borderRadius: 2 }}>
+                    Save Changes
                 </Button>
             </Box>
-
-            {/* Image Viewer Modal */}
-            {imageView && (
-                <Box
-                    sx={{
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        bgcolor: "rgba(0, 0, 0, 0.8)",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        zIndex: 9999,
-                    }}
-                    onClick={closeImageView}
-                >
-                    <Box
-                        sx={{
-                            maxWidth: "80%",
-                            maxHeight: "80%",
-                            position: "relative",
-                        }}
-                    >
-                        <img
-                            src={imageView}
-                            alt="View enlarged image"
-                            style={{
-                                maxWidth: "100%",
-                                maxHeight: "100%",
-                                objectFit: "contain",
-                            }}
-                        />
-                        <IconButton
-                            sx={{
-                                position: "absolute",
-                                top: "-40px",
-                                right: 0,
-                                color: "white",
-                            }}
-                            onClick={closeImageView}
-                        >
-                            <Cancel />
-                        </IconButton>
-                    </Box>
-                </Box>
-            )}
         </Box>
     );
 };
