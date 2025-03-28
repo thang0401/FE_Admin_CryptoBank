@@ -220,12 +220,12 @@ const CustomerManagement = () => {
                                 value={filters.phone}
                                 onChange={(e) => handleFilterChange('phone', e.target.value)}
                             />
-                            {/* <TextField
-                                label="ID Card"
-                                size="small"
-                                value={filters.id_card}
-                                onChange={(e) => handleFilterChange('id_card', e.target.value)}
-                            /> */}
+                                {/* <TextField
+                                    label="ID Card"
+                                    size="small"
+                                    value={filters.id_card}
+                                    onChange={(e) => handleFilterChange('id_card', e.target.value)}
+                                /> */}
                             <FormControl size="small" sx={{ minWidth: 120 }}>
                                 <InputLabel>Ranking</InputLabel>
                                 <Select
