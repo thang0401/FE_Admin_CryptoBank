@@ -50,7 +50,7 @@ const EmployeeDetails = () => {
         //mock
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // Dữ liệu mock
+      
         const mockData: Employee = {
           id: id as string,
           avatar: "",
