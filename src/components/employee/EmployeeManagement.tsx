@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react'
+"use client";
+
+import type React from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Button,
   TextField,
@@ -10,29 +12,46 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Avatar,
-  Chip,
   Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TablePagination,
-  Checkbox
-} from '@mui/material'
-import { Users, UserPlus, UserCheck, Clock, FileText, Plus, Eye, Trash2, MoreVertical, Search, HelpCircle, Shield, ClipboardList, Users2, Calculator, Scale, LineChart, Wallet, Lock, Plug, Building2, Code2, Share2, Megaphone } from 'lucide-react'
-import { RoleConfig, User } from 'src/types/employee-management/employeeManagementTypes'
-
-
-
+  Divider,
+  useTheme,
+  alpha,
+  Stack,
+  Container,
+  InputAdornment,
+  CircularProgress,
+} from "@mui/material";
+import {
+  Users,
+  UserPlus,
+  UserCheck,
+  Clock,
+  Plus,
+  Trash2,
+  Search,
+  HelpCircle,
+  Shield,
+  ClipboardList,
+  Users2,
+  Calculator,
+  Scale,
+  LineChart,
+  Wallet,
+  Lock,
+  Plug,
+  Building2,
+  Code2,
+  Share2,
+  Megaphone,
+  Download,
+  RefreshCcw,
+} from "lucide-react";
+import AddEmployeeDialog from "./AddEmployeeDialog";
+import EmployeeTable from "./EmployeeTable";
+import StatCard from "./StatCard";
+import { Employee, RoleConfig } from "src/types/employee-management/type";
+import { useRouter } from "next/router";
 
 const ROLES: RoleConfig[] = [
   { name: "Guest", icon: <HelpCircle size={20} />, color: "#9e9e9e" },
@@ -49,452 +68,472 @@ const ROLES: RoleConfig[] = [
   { name: "Exchange Manager", icon: <Building2 size={20} />, color: "#009688" },
   { name: "Developer", icon: <Code2 size={20} />, color: "#8bc34a" },
   { name: "Affiliate Manager", icon: <Share2 size={20} />, color: "#ff5722" },
-  { name: "Marketing Manager", icon: <Megaphone size={20} />, color: "#e91e63" }
-]
+  { name: "Marketing Manager", icon: <Megaphone size={20} />, color: "#e91e63" },
+];
+
+const EMPLOYMENT_TYPES = ["Full-time", "Part-time", "Contract"];
+const MARITAL_STATUS = ["Single", "Married", "Divorced", "Widowed"];
+const EMPLOYEE_STATUS = ["Active", "Terminated", "Suspended"];
+const BILLING_OPTIONS = ["Auto Debit", "Cash", "Bank Transfer", "Credit Card"];
 
 const getRoleConfig = (roleName: string): RoleConfig => {
-  return ROLES.find(role => role.name === roleName) || ROLES[0]
-}
-
-const BILLING_OPTIONS = ["Auto Debit", "Cash", "Bank Transfer", "Credit Card"]
+  return ROLES.find((role) => role.name === roleName) || ROLES[0];
+};
 
 const EmployeeManagement = () => {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: "gs",
-      avatar: "",
-      name: "Galen Slixby",
-      username: "gslixby0",
-      password: "",
-      role: "Editor",
-      billing: "Auto Debit",
-      status: "Inactive"
-    }
-  ])
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
-  const [selectedRole, setSelectedRole] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('')
-  const [openDialog, setOpenDialog] = useState(false)
-  const [newUser, setNewUser] = useState<{
-    name: string
-    username: string
-    password: string
-    role: string
-    billing: string
-    status: "Active" | "Inactive" | "Pending"
-  }>({
-    name: '',
-    username: '',
-    password: '',
-    role: '',
-    billing: '',
-    status: 'Pending'
-  })
-  // Change page
+  const theme = useTheme();
+  const router = useRouter();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [newEmployee, setNewEmployee] = useState<Employee>({
+    id: "",
+    avatar: "",
+    name: "",
+    username: "",
+    password: "",
+    role: "",
+    billing: "",
+    status: "Active",
+    employment_type: "Full-time",
+    marital_status: "Single",
+    hire_date: new Date().toISOString().split("T")[0],
+    termination_date: null,
+    salary: 0,
+    bonus: 0,
+    bank_account: "",
+    bank_name: "",
+    insurance_number: "",
+    tax_code: "",
+    emergency_contact_name: "",
+    emergency_contact_phone: "",
+  });
+
+  // Fetch danh sách nhân viên khi component mount
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // const response = await fetch("/api/employees", {
+        //   method: "GET",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        // });
+
+        // if (!response.ok) {
+        //   throw new Error("Failed to fetch employees");
+        // }
+
+        // const data = await response.json();
+        // setEmployees(data); // Giả sử server trả về mảng nhân viên
+             
+              
+                const mockData: Employee[] = [
+                  {
+                  id: "1",
+                  avatar: "1",
+                  name: "Galen Slixby",
+                  username: "gslixby0",
+                  password: "",
+                  role: "Editor",
+                  billing: "Auto Debit",
+                  status: "Active",
+                  employment_type: "Full-time",
+                  marital_status: "Single",
+                  hire_date: "2023-01-15",
+                  termination_date: null,
+                  salary: 5000000,
+                  bonus: 500000,
+                  bank_account: "123456789",
+                  bank_name: "VietcomBank",
+                  insurance_number: "INS123456",
+                  tax_code: "TAX123456",
+                  emergency_contact_name: "Emergency Contact",
+                  emergency_contact_phone: "0987654321",
+                }
+                ]
+        
+                setEmployees(mockData);
+      } catch (err) {
+        // Ép kiểu err thành Error hoặc kiểm tra kiểu
+        if (err instanceof Error) {
+          setError(err.message || "An error occurred while fetching employees");
+        } else {
+          setError("An unknown error occurred while fetching employees");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
   const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
+    setPage(newPage);
+  };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
-  // Add user
-  const handleAddUser = () => {
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      avatar: '',
-      ...newUser
+    setRowsPerPage(Number.parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleAddEmployee = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newEmployee),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add employee");
+      }
+
+      const addedEmployee = await response.json();
+      setEmployees([...employees, addedEmployee]);
+      setOpenDialog(false);
+      setNewEmployee({
+        id: "",
+        avatar: "",
+        name: "",
+        username: "",
+        password: "",
+        role: "",
+        billing: "",
+        status: "Active",
+        employment_type: "Full-time",
+        marital_status: "Single",
+        hire_date: new Date().toISOString().split("T")[0],
+        termination_date: null,
+        salary: 0,
+        bonus: 0,
+        bank_account: "",
+        bank_name: "",
+        insurance_number: "",
+        tax_code: "",
+        emergency_contact_name: "",
+        emergency_contact_phone: "",
+      });
+    } catch (err) {
+      // Ép kiểu err thành Error hoặc kiểm tra kiểu
+      if (err instanceof Error) {
+        setError(err.message || "An error occurred while adding the employee");
+      } else {
+        setError("An unknown error occurred while adding the employee");
+      }
+    } finally {
+      setLoading(false);
     }
-    setUsers([...users, user])
-    setOpenDialog(false)
-    setNewUser({
-      name: '',
-      username: '',
-      password: '',
-      role: '',
-      billing: '',
-      status: 'Pending'
-    })
-  }
-  // Select user
-  const handleSelectUser = (id: string) => {
-    setSelectedUsers((prev) =>
-      prev.includes(id) ? prev.filter((userId) => userId !== id) : [...prev, id]
+  };
+
+  const handleSelectEmployee = (id: string, isViewDetails? : boolean) => {
+    if(isViewDetails){
+      router.push(`/employee-management/${id}`);
+    }else{
+    setSelectedEmployees((prev) =>
+      prev.includes(id) ? prev.filter((employeeId) => employeeId !== id) : [...prev, id]
     );
+    }
   };
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const allUserIds = users.map((user) => user.id);
-      setSelectedUsers(allUserIds);
+      const allEmployeeIds = filteredEmployees.map((employee) => employee.id);
+      setSelectedEmployees(allEmployeeIds);
     } else {
-      setSelectedUsers([]);
+      setSelectedEmployees([]);
     }
   };
 
-  // Filters
-  const filteredUsers = useMemo(() => {
-    return users.filter(user => {
-      const matchesSearch = searchQuery.toLowerCase() === '' ||
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleDeleteSelected = () => {
+    setEmployees(employees.filter((employee) => !selectedEmployees.includes(employee.id)));
+    setSelectedEmployees([]);
+  };
 
-      const matchesRole = selectedRole === '' ||
-        user.role.toLowerCase() === selectedRole.toLowerCase()
+  const handleDeleteEmployee = (id: string) => {
+    setEmployees(employees.filter((employee) => employee.id !== id));
+    setSelectedEmployees(selectedEmployees.filter((employeeId) => employeeId !== id));
+  };
 
-      const matchesStatus = selectedStatus === '' ||
-        user.status.toLowerCase() === selectedStatus.toLowerCase()
+  const filteredEmployees = useMemo(() => {
+    return employees.filter((employee) => {
+      const matchesSearch =
+        searchQuery.toLowerCase() === "" ||
+        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.username.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return matchesSearch && matchesRole && matchesStatus
-    })
-  }, [users, searchQuery, selectedRole, selectedStatus])
+      const matchesRole = selectedRole === "" || employee.role.toLowerCase() === selectedRole.toLowerCase();
 
+      const matchesStatus = selectedStatus === "" || employee.status.toLowerCase() === selectedStatus.toLowerCase();
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [employees, searchQuery, selectedRole, selectedStatus]);
+
+  const stats = [
+    {
+      title: "Total Employees",
+      value: employees.length,
+      change: "+29%",
+      subtitle: "Total number of employees",
+      icon: <Users size={20} />,
+      color: theme.palette.primary.main,
+      bgColor: alpha(theme.palette.primary.main, 0.1),
+    },
+    {
+      title: "Full-time Employees",
+      value: employees.filter((e) => e.employment_type === "Full-time").length,
+      change: "+18%",
+      subtitle: "Last week's statistics",
+      icon: <UserPlus size={20} />,
+      color: theme.palette.error.main,
+      bgColor: alpha(theme.palette.error.main, 0.1),
+    },
+    {
+      title: "Active Employees",
+      value: employees.filter((e) => e.status === "Active").length,
+      change: "-14%",
+      subtitle: "Last week's statistics",
+      icon: <UserCheck size={20} />,
+      color: theme.palette.success.main,
+      bgColor: alpha(theme.palette.success.main, 0.1),
+    },
+    {
+      title: "New Employees",
+      value: employees.filter((e) => {
+        const hireDate = new Date(e.hire_date);
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        return hireDate >= oneMonthAgo;
+      }).length,
+      change: "+42%",
+      subtitle: "Last week's statistics",
+      icon: <Clock size={20} />,
+      color: theme.palette.warning.main,
+      bgColor: alpha(theme.palette.warning.main, 0.1),
+    },
+  ];
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Grid container spacing={3}>
-        {/* Stats Cards */}
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography color="text.secondary" variant="body2">Session</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'baseline', mt: 1, mb: 0.5 }}>
-                    <Typography variant="h4" component="span">21,459</Typography>
-                    <Typography color="success.main" variant="body2" sx={{ ml: 1 }}>(+29%)</Typography>
-                  </Box>
-                  <Typography color="text.secondary" variant="body2">Total User</Typography>
-                </Box>
-                <Box sx={{ p: 1, bgcolor: 'primary.lighter', borderRadius: '50%' }}>
-                  <Users size={20} color="#2196f3" />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+    <Container maxWidth="xl">
+      <Box sx={{ py: 4 }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            Employee Management
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Manage information and status of all employees in the system
+          </Typography>
+        </Box>
+
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <CircularProgress />
+          </Box>
+        )}
+
+        {error && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+        )}
+
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {stats.map((stat, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <StatCard
+                title={stat.title}
+                value={stat.value}
+                change={stat.change}
+                subtitle={stat.subtitle}
+                icon={stat.icon}
+                color={stat.color}
+                bgColor={stat.bgColor}
+              />
+            </Grid>
+          ))}
         </Grid>
 
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography color="text.secondary" variant="body2">Paid Users</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'baseline', mt: 1, mb: 0.5 }}>
-                    <Typography variant="h4" component="span">4,567</Typography>
-                    <Typography color="success.main" variant="body2" sx={{ ml: 1 }}>(+18%)</Typography>
-                  </Box>
-                  <Typography color="text.secondary" variant="body2">Last week analytics</Typography>
-                </Box>
-                <Box sx={{ p: 1, bgcolor: '#ffebee', borderRadius: '50%' }}>
-                  <UserPlus size={20} color="#f44336" />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography color="text.secondary" variant="body2">Active Users</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'baseline', mt: 1, mb: 0.5 }}>
-                    <Typography variant="h4" component="span">19,860</Typography>
-                    <Typography color="error.main" variant="body2" sx={{ ml: 1 }}>(-14%)</Typography>
-                  </Box>
-                  <Typography color="text.secondary" variant="body2">Last week analytics</Typography>
-                </Box>
-                <Box sx={{ p: 1, bgcolor: '#e8f5e9', borderRadius: '50%' }}>
-                  <UserCheck size={20} color="#4caf50" />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography color="text.secondary" variant="body2">Pending Users</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'baseline', mt: 1, mb: 0.5 }}>
-                    <Typography variant="h4" component="span">237</Typography>
-                    <Typography color="success.main" variant="body2" sx={{ ml: 1 }}>(+42%)</Typography>
-                  </Box>
-                  <Typography color="text.secondary" variant="body2">Last week analytics</Typography>
-                </Box>
-                <Box sx={{ p: 1, bgcolor: '#fff8e1', borderRadius: '50%' }}>
-                  <Clock size={20} color="#ffc107" />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        {/* Similar cards for Active and Pending Users... */}
-
-        {/* Filters */}
-        <Grid item xs={12}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Filters</Typography>
+        <Card sx={{ mb: 4, p: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, px: 1 }}>
+            Filters
+          </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Select Role</InputLabel>
+              <FormControl fullWidth size="small">
+                <InputLabel>Role</InputLabel>
                 <Select
                   value={selectedRole}
-                  label="Select Role"
+                  label="Role"
                   onChange={(e) => {
-                    setSelectedRole(e.target.value)
-                    setPage(0) // Reset page when filter changes
+                    setSelectedRole(e.target.value);
+                    setPage(0);
                   }}
+                  disabled={loading}
                 >
                   <MenuItem value="">All Roles</MenuItem>
-                  {ROLES.map(role => (
-                    <MenuItem key={role.name} value={role.name}>{role.name}</MenuItem>
+                  {ROLES.map((role) => (
+                    <MenuItem key={role.name} value={role.name}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Box sx={{ color: role.color }}>{role.icon}</Box>
+                        {role.name}
+                      </Box>
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Select Status</InputLabel>
+              <FormControl fullWidth size="small">
+                <InputLabel>Status</InputLabel>
                 <Select
                   value={selectedStatus}
-                  label="Select Status"
+                  label="Status"
                   onChange={(e) => {
-                    setSelectedStatus(e.target.value)
-                    setPage(0) // Reset page when filter changes
+                    setSelectedStatus(e.target.value);
+                    setPage(0);
                   }}
+                  disabled={loading}
                 >
-                  <MenuItem value="">All Status</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="">All Statuses</MenuItem>
+                  {EMPLOYEE_STATUS.map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
           </Grid>
-        </Grid>
+        </Card>
 
-        {/* Table Controls */}
-        {/* Search and Controls */}
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Card sx={{ mb: 4 }}>
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 2,
+            }}
+          >
             <TextField
-              placeholder="Search User"
+              placeholder="Search Employees"
               size="small"
-              sx={{ width: 240 }}
+              sx={{ minWidth: 240 }}
               value={searchQuery}
               onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setPage(0) // Reset page when search changes
+                setSearchQuery(e.target.value);
+                setPage(0);
               }}
+              disabled={loading}
               InputProps={{
-                startAdornment: <Search size={20} />,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search size={18} />
+                  </InputAdornment>
+                ),
               }}
             />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="outlined" startIcon={<FileText />}>
-                Export
+            <Stack direction="row" spacing={1}>
+              {selectedEmployees.length > 0 && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Trash2 size={18} />}
+                  onClick={handleDeleteSelected}
+                  disabled={loading}
+                >
+                  Delete ({selectedEmployees.length})
+                </Button>
+              )}
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<RefreshCcw size={18} />}
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedRole("");
+                  setSelectedStatus("");
+                }}
+                disabled={loading}
+              >
+                Refresh
+              </Button>
+              <Button variant="outlined" startIcon={<Download size={18} />} disabled={loading}>
+                Export to Excel
               </Button>
               <Button
                 variant="contained"
-                startIcon={<Plus />}
+                startIcon={loading ? <CircularProgress size={18} /> : <Plus size={18} />}
                 onClick={() => setOpenDialog(true)}
+                disabled={loading}
               >
-                Add New User
+                Add Employee
               </Button>
-            </Box>
+            </Stack>
           </Box>
-        </Grid>
 
-        {/* Users Table */}
-        <Grid item xs={12}>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    indeterminate={
-                      selectedUsers.length > 0 && 
-                      selectedUsers.length < filteredUsers.length
-                    }
-                    checked={
-                      filteredUsers.length > 0 && 
-                      selectedUsers.length === filteredUsers.length
-                    }
-                    onChange={handleSelectAll}
-                  />
-                </TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Billing</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Action</TableCell>
-              </TableRow>
-            </TableHead>
+          <Divider />
 
-            <TableBody>
-              {filteredUsers
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((user) => (
-                  <TableRow
-                    key={user.id}
-                    selected={selectedUsers.includes(user.id)}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedUsers.includes(user.id)}
-                        onChange={() => handleSelectUser(user.id)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        {user.avatar ? (
-                          <Avatar src={user.avatar} />
-                        ) : (
-                          <Avatar>{user.name.charAt(0)}</Avatar>
-                        )}
-                        <Typography variant="subtitle2">{user.name}</Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{ color: getRoleConfig(user.role).color }}>
-                          {getRoleConfig(user.role).icon}
-                        </Box>
-                        {user.role}
-                      </Box>
-                    </TableCell>
-                    <TableCell>{user.billing}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={user.status}
-                        color={
-                          user.status === "Active"
-                            ? "success"
-                            : user.status === "Pending"
-                              ? "warning"
-                              : "default"
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton size="small">
-                        <Eye size={20} />
-                      </IconButton>
-                      <IconButton 
-                        size="small" 
-                        // onClick={() => handleDeleteUser(user.id)}
-                      >
-                        <Trash2 size={20} />
-                      </IconButton>
-                      <IconButton size="small">
-                        <MoreVertical size={20} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+          <EmployeeTable
+            employees={filteredEmployees}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            selectedEmployees={selectedEmployees}
+            handleSelectEmployee={handleSelectEmployee}
+            handleSelectAll={handleSelectAll}
+            handleDeleteEmployee={handleDeleteEmployee}
+            getRoleConfig={getRoleConfig}
+          />
+
           <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
+            rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={filteredUsers.length}
+            count={filteredEmployees.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Rows per page:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} of ${count}`}
           />
-        </TableContainer>
-      </Grid>
-      </Grid>
+        </Card>
+      </Box>
 
-      {/* Add User Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Add New User</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, pb: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="Name"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Username"
-              value={newUser.username}
-              onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Password"
-              value={newUser.password}
-              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-            />
-            <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select
-                value={newUser.role}
-                label="Role"
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              >
-                {ROLES.map((role) => (
-                  <MenuItem key={role.name} value={role.name}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {role.icon}
-                      {role.name}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
+      <AddEmployeeDialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        newEmployee={newEmployee}
+        setNewEmployee={setNewEmployee}
+        handleAddEmployee={handleAddEmployee}
+        roles={ROLES}
+        employmentTypes={EMPLOYMENT_TYPES}
+        maritalStatus={MARITAL_STATUS}
+        employeeStatus={EMPLOYEE_STATUS}
+        billingOptions={BILLING_OPTIONS}
+        loading={loading}
+      />
+    </Container>
+  );
+};
 
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Billing</InputLabel>
-              <Select
-                value={newUser.billing}
-                label="Billing"
-                onChange={(e) => setNewUser({ ...newUser, billing: e.target.value })}
-              >
-                {BILLING_OPTIONS.map(option => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={newUser.status}
-                label="Status"
-                onChange={(e) => setNewUser({ ...newUser, status: e.target.value as "Active" | "Inactive" | "Pending" })}
-              >
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
-                <MenuItem value="Pending">Pending</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleAddUser} variant="contained">Add User</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  )
-}
-
-export default EmployeeManagement
+export default EmployeeManagement;
