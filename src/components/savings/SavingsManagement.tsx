@@ -36,16 +36,15 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 interface SavingsAccount {
   id: string
-  status: "active" | "pending" | "completed"
-  heirStatus: "no_heir" | "has_heir" | "in_process"
-  owner: { id: string; name: string; email: string; phone: string }
-  term: string
+  user_id: string
+  user_firstname: string
+  user_lastname: string
+  heirStatus: boolean
+  balance: number
+  amount_month: number
+  type: string
   startDate: string
   endDate: string
-  balance: string
-  supportStaff: string
-  contractUrl: string
-  googleDriveUrl: string
 }
 
 interface Filters {
@@ -87,11 +86,37 @@ const SavingsManagement: React.FC = () => {
     ownerName: "",
   })
   const [filteredAccounts, setFilteredAccounts] = useState<SavingsAccount[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchSavingsAccounts = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch("http://14.225.206.68:8000/saving/get-saving-list", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch savings accounts")
+      }
+      
+      const data: SavingsAccount[] = await response.json()
+      setFilteredAccounts(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleFilterChange = (field: keyof Filters, value: any) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
   }
-  // Forwad to details
+
   const handleAccountSelect = (id: string) => {
     router.push(`/savings-management/${id}`)
   }
@@ -107,45 +132,16 @@ const SavingsManagement: React.FC = () => {
   }
 
   const applyFilters = useCallback(() => {
-    const mockAccounts: SavingsAccount[] = [
-      {
-        id: "SAV001",
-        status: "active",
-        heirStatus: "no_heir",
-        owner: { id: "USRER001", name: "Nguyen Van Thuan", email: "thuannv.it@gmail.com", phone: "+8434567890" },
-        term: "12 months",
-        startDate: "2024-02-24",
-        endDate: "2025-02-24",
-        balance: "50 USDC",
-        supportStaff: "Staff01",
-        contractUrl: "",
-        googleDriveUrl: "",
-      },
-      {
-        id: "SAV002",
-        status: "pending",
-        heirStatus: "has_heir",
-        owner: { id: "USRER002", name: "Tran Huu Luan", email: "luantr@gmail.com", phone: "+8434567891" },
-        term: "6 months",
-        startDate: "2024-02-25",
-        endDate: "2024-08-25",
-        balance: "3 USDC",
-        supportStaff: "Staff02",
-        contractUrl: "",
-        googleDriveUrl: "",
-      },
-    ]
-
-    let filtered = [...mockAccounts]
+    let filtered = [...filteredAccounts]
 
     if (filters.userId) {
       filtered = filtered.filter((account) =>
-        account.owner.id.toLowerCase().includes(filters.userId.toLowerCase())
+        account.user_id.toLowerCase().includes(filters.userId.toLowerCase())
       )
     }
     if (filters.term) {
       filtered = filtered.filter((account) =>
-        account.term.toLowerCase().includes(filters.term.toLowerCase())
+        account.type.toLowerCase().includes(filters.term.toLowerCase())
       )
     }
     if (filters.dateFrom) {
@@ -156,17 +152,24 @@ const SavingsManagement: React.FC = () => {
     }
     if (filters.ownerName) {
       filtered = filtered.filter((account) =>
-        account.owner.name.toLowerCase().includes(filters.ownerName.toLowerCase())
+        `${account.user_firstname} ${account.user_lastname}`
+          .toLowerCase()
+          .includes(filters.ownerName.toLowerCase())
       )
     }
 
     setFilteredAccounts(filtered)
-  }, [filters])
+  }, [filters, filteredAccounts])
 
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchSavingsAccounts()
+  }, [])
+
+  // Apply filters when they change
   useEffect(() => {
     applyFilters()
-  }, [applyFilters])
-
+  }, [filters])
   return (
     <Box sx={{ p: 3 }}>
       <StyledCard>
@@ -267,6 +270,8 @@ const SavingsManagement: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Savings Accounts
           </Typography>
+          {loading && <Typography>Loading...</Typography>}
+          {error && <Typography color="error">{error}</Typography>}
           <TableContainer>
             <Table>
               <TableHead>
@@ -276,7 +281,7 @@ const SavingsManagement: React.FC = () => {
                   <TableCell>Owner</TableCell>
                   <TableCell>Heir Status</TableCell>
                   <TableCell>Balance</TableCell>
-                  <TableCell>Term</TableCell>
+                  <TableCell>Type</TableCell>
                   <TableCell>Start Date</TableCell>
                   <TableCell>End Date</TableCell>
                   <TableCell>Actions</TableCell>
@@ -285,22 +290,22 @@ const SavingsManagement: React.FC = () => {
               <TableBody>
                 {filteredAccounts.map((account) => (
                   <TableRow key={account.id}>
-                    <TableCell>{account.id}</TableCell>
-                    <TableCell>{account.owner.id}</TableCell>
-                    <TableCell>{account.owner.name}</TableCell>
-                    <TableCell>
-                      <StatusChip status={account.heirStatus} />
-                    </TableCell>
-                    <TableCell>{account.balance}</TableCell>
-                    <TableCell>{account.term}</TableCell>
-                    <TableCell>{formatDate(account.startDate)}</TableCell>
-                    <TableCell>{formatDate(account.endDate)}</TableCell>
-                    <TableCell>
-                      <IconButton onClick={() => handleAccountSelect(account.id)}>
-                        <VisibilityIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+                  <TableCell>{"ACC" + account.id.split("-")[0]}</TableCell> {/* Cột ID */}
+                  <TableCell>{account.user_id}</TableCell>
+                  <TableCell>{`${account.user_firstname} ${account.user_lastname}`}</TableCell>
+                  <TableCell>
+                    <StatusChip status={account.heirStatus ? "has_heir" : "no_heir"} />
+                  </TableCell>
+                  <TableCell sx={{paddingLeft: 10}}>{account.balance}</TableCell>
+                  <TableCell>{account.amount_month + " " + account.type}</TableCell> {/* Cột Type */}
+                  <TableCell>{formatDate(account.startDate)}</TableCell>
+                  <TableCell>{formatDate(account.endDate)}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleAccountSelect(account.id)}>
+                      <VisibilityIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
                 ))}
               </TableBody>
             </Table>
