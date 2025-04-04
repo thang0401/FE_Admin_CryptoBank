@@ -93,17 +93,17 @@ const SavingsManagement: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch("http://14.225.206.68:8000/saving/get-saving-list", {
+      const response = await fetch("https://api.be-crypto-depot.name.vn/saving/get-saving-list", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       })
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch savings accounts")
       }
-      
+
       const data: SavingsAccount[] = await response.json()
       setFilteredAccounts(data)
     } catch (err) {
@@ -256,7 +256,7 @@ const SavingsManagement: React.FC = () => {
                 startIcon={<ClearIcon />}
                 onClick={handleClearFilters}
                 fullWidth
-                sx={{ height: "100%" }} 
+                sx={{ height: "100%" }}
               >
                 Clear
               </Button>

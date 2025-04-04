@@ -66,7 +66,7 @@ const CustomerManagement = () => {
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    
+
     const [filters, setFilters] = useState<{
         user_id: string;
         ranking_id: string;
@@ -85,17 +85,17 @@ const CustomerManagement = () => {
         const fetchCustomers = async () => {
             try {
                 setLoading(true);
-                const response = await fetch("http://14.225.206.68:8000/api/users", {
+                const response = await fetch("https://api.be-crypto-depot.name.vn/api/users", {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                
+
                 const data: { message: string; object: any[] } = await response.json();
                 const formattedCustomers: Customer[] = data.object.map((customer: any) => ({
                     id: customer.id || `USR${Math.random().toString(36).substr(2, 9)}`,
@@ -114,7 +114,7 @@ const CustomerManagement = () => {
                     modified_by: 'system',
                     modified_date: customer.lastLoginAt || new Date().toISOString()
                 }));
-                
+
                 setCustomers(formattedCustomers);
             } catch (error) {
                 console.error('Error fetching customers:', error);
@@ -184,7 +184,7 @@ const CustomerManagement = () => {
             <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
                 Customer Management
             </Typography>
-            
+
             {loading ? (
                 <Typography>Loading customers...</Typography>
             ) : (
