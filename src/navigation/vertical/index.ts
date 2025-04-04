@@ -49,9 +49,9 @@ const navigation = (): VerticalNavItemsType => {
           icon: 'bx:envelope',
           path: '/term-management'
         }, {
-          title: 'Term Management',
+          title: 'USDC Orders Management',
           icon: 'bx:envelope',
-          path: '/orders-management'
+          path: '/usdc-orders-management'
         }
       ]
     },
