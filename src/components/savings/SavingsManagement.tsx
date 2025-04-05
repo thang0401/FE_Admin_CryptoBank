@@ -93,7 +93,7 @@ const SavingsManagement: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch("https://api.be-crypto-depot.name.vn/saving/get-saving-list", {
+      const response = await fetch("https://be-crypto-depot.name.vn/saving/get-saving-list", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

@@ -85,7 +85,7 @@ const CustomerManagement = () => {
         const fetchCustomers = async () => {
             try {
                 setLoading(true);
-                const response = await fetch("https://api.be-crypto-depot.name.vn/api/users", {
+                const response = await fetch("https://be-crypto-depot.name.vn/api/users", {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
