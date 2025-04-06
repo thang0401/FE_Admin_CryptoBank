@@ -426,11 +426,11 @@ const AccountDetails: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* {showSnackbar && (
+      {showSnackbar && (
         <Alert severity={successMessage.includes("Failed") ? "error" : "success"} onClose={() => setShowSnackbar(false)}>
           {successMessage}
         </Alert>
-      )} */}
+      )}
     </Box>
   )
 }

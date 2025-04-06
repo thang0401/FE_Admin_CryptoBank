@@ -13,9 +13,9 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Management',
       children: [
         {
-          title: 'Wallet Management',
+          title: 'Asset management and custody',
           icon: 'bx:envelope',
-          path: '/crypto-management'
+          path: '/asset-management'
         },
         {
           title: 'Customer Management',
