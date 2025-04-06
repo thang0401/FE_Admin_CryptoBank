@@ -15,16 +15,16 @@ const users: UserDataType[] = [
     id: 1,
     role: 'admin',
     password: 'admin',
-    fullName: 'John Doe',
-    username: 'johndoe',
+    fullName: 'Nguyễn Cao Thăng',
+    username: 'thangadmin',
     email: 'thangadmin@gmail.com'
   },
   {
     id: 2,
     role: 'client',
     password: 'client',
-    fullName: 'Jane Doe',
-    username: 'janedoe',
+    fullName: 'Nguyễn Cao Thăng',
+    username: 'thangclient',
     email: 'thangclient@gmail.com'
   }
 ]
