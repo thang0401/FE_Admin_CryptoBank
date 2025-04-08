@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Typography,
@@ -18,6 +18,12 @@ import {
     FormControl,
     InputLabel,
     Chip,
+    CircularProgress,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from "@mui/material";
 import {
     Save as SaveIcon,
@@ -26,74 +32,167 @@ import {
 } from "@mui/icons-material";
 import { useRouter } from "next/router";
 
-// Customer interface (unchanged)
+// Customer interface
 interface Customer {
     id: string;
-    fullName: string;
-    firstName: string;
-    lastName: string;
+    username: string;
     email: string;
-    address: string;
-    dateOfBirth: string;
+    fullName: string;
+    avatarUrl: string;
+    firstName: string;
+    middleName: string;
+    lastName: string;
+    phoneNumber: string;
     gender: string;
-    phone: string;
-    idCardFrontImgUrl: string;
-    idCardBackImgUrl: string;
+    dateOfBirth: string;
+    homeAddress: string;
     ward: string;
     district: string;
     province: string;
     nation: string;
-    idNumber: string;
+    walletAddress: string;
     kycStatus: string;
+    hasAcceptedTerms: boolean;
+    lastLoginAt: string;
+    idCardFrontImgUrl: string | null;
+    idCardBackImgUrl: string | null;
+    idNumber: string | null;
 }
-
-// Mock data (unchanged)
-const newMockCustomer: Customer = {
-    id: "USER001",
-    fullName: "Nguyen Van Thuan",
-    firstName: "Thuan",
-    lastName: "Nguyen Van",
-    email: "thuanv@gmail.com",
-    address: "123 Dinh Bo Linh",
-    dateOfBirth: "2003-01-01T00:00:00.000Z",
-    gender: "Male",
-    phone: "0123456789",
-    idCardFrontImgUrl: "https://thanhphohaiphong.gov.vn/wp-content/uploads/2021/03/photo-1615969046175-161596904618017747411431.jpeg",
-    idCardBackImgUrl: "https://thanhphohaiphong.gov.vn/wp-content/uploads/2021/03/photo-1615969046175-161596904618017747411431.jpeg",
-    ward: "Phuong 1",
-    district: "District 1",
-    province: "Ho Chi Minh city",
-    nation: "Viet Nam",
-    idNumber: "123456789",
-    kycStatus: "Pending",
-};
 
 const CustomerDetails: React.FC = () => {
     const router = useRouter();
-    const [customer, setCustomer] = useState(newMockCustomer);
+    const { id } = router.query;
+    const [customer, setCustomer] = useState<Customer | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [saveResult, setSaveResult] = useState<"success" | "fail" | null>(null);
+    const [openResultDialog, setOpenResultDialog] = useState(false);
+
+    // Fetch customer data from API
+    useEffect(() => {
+        const fetchCustomerData = async () => {
+            if (!id) return;
+
+            try {
+                setLoading(true);
+                const response = await fetch(`https://be-crypto-depot.name.vn/api/users/${id}`);
+
+                if (!response.ok) {
+                    throw new Error(`Error fetching customer data: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("API response:", data);
+
+                const userData = data.object;
+
+                const mappedCustomer: Customer = {
+                    id: userData.id || id as string,
+                    username: userData.username || "",
+                    email: userData.email || "",
+                    fullName: userData.fullName || `${userData.firstName || ''} ${userData.middleName || ''} ${userData.lastName || ''}`.trim() || "",
+                    avatarUrl: userData.avatarUrl || "",
+                    firstName: userData.firstName || "",
+                    middleName: userData.middleName || "",
+                    lastName: userData.lastName || "",
+                    phoneNumber: userData.phoneNumber || "",
+                    gender: userData.gender || "",
+                    dateOfBirth: userData.dateOfBirth || "",
+                    homeAddress: userData.homeAddress || "",
+                    ward: userData.ward || "",
+                    district: userData.district || "",
+                    province: userData.province || "",
+                    nation: userData.nation || "",
+                    walletAddress: userData.walletAddress || "",
+                    kycStatus: userData.kycStatus === true ? "Active" : userData.kycStatus === "Pending" ? "Pending" : "Inactive",
+                    hasAcceptedTerms: userData.hasAcceptedTerms || false,
+                    lastLoginAt: userData.lastLoginAt || "",
+                    idCardFrontImgUrl: null,
+                    idCardBackImgUrl: null,
+                    idNumber: null,
+                };
+
+                console.log("Mapped customer:", mappedCustomer);
+                setCustomer(mappedCustomer);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "An unknown error occurred");
+                console.error("Error fetching customer data:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCustomerData();
+    }, [id]);
 
     // Handle KYC Status change
     const handleKycStatusChange = (event: any) => {
-        setCustomer((prev) => ({
-            ...prev,
-            kycStatus: event.target.value,
-        }));
+        if (!customer) return;
+
+        setCustomer((prev) => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                kycStatus: event.target.value,
+            };
+        });
     };
 
-    // Handle Save button
-    const handleSave = () => {
-        alert("Customer information has been saved!");
+    // Handle Save button (open confirm dialog)
+    const handleSaveClick = () => {
+        setOpenConfirmDialog(true);
+    };
+
+    // Handle confirm save (PUT request)
+    const handleConfirmSave = async () => {
+        if (!customer) return;
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/users/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    kycStatus: customer.kycStatus === "Active" ? true : customer.kycStatus === "Pending" ? "Pending" : null,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error updating KYC status: ${response.status}`);
+            }
+
+            setSaveResult("success");
+        } catch (err) {
+            console.error("Error updating KYC status:", err);
+            setSaveResult("fail");
+        } finally {
+            setOpenConfirmDialog(false);
+            setOpenResultDialog(true);
+        }
+    };
+
+    // Handle close confirm dialog
+    const handleCloseConfirmDialog = () => {
+        setOpenConfirmDialog(false);
+    };
+
+    // Handle close result dialog
+    const handleCloseResultDialog = () => {
+        setOpenResultDialog(false);
+        setSaveResult(null);
     };
 
     // Status color function
     const getStatusColor = (status: string) => {
         switch (status) {
             case "Active":
-                return "#4CAF50"; // Green
+                return "#4CAF50";
             case "Pending":
-                return "#FF9800"; // Orange
+                return "#FF9800";
             case "Inactive":
-                return "#9E9E9E"; // Grey
+                return "#9E9E9E";
             default:
                 return "#9E9E9E";
         }
@@ -125,13 +224,41 @@ const CustomerDetails: React.FC = () => {
         alert("Copied to clipboard!");
     };
 
+    if (loading) {
+        return (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error || !customer) {
+        return (
+            <Box sx={{ p: 3, textAlign: "center" }}>
+                <Typography variant="h6" color="error">
+                    {error || "Customer data not available"}
+                </Typography>
+                <Button
+                    variant="contained"
+                    onClick={() => router.push("/customer-management")}
+                    sx={{ mt: 2 }}
+                >
+                    Back to Customer List
+                </Button>
+            </Box>
+        );
+    }
+
     return (
         <Box sx={{ width: "100%", height: "100%", padding: "0 16px" }}>
             {/* Header */}
             <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Avatar sx={{ bgcolor: "#1976d2", width: 56, height: 56, mr: 2 }}>
+                        <Avatar 
+                            sx={{ bgcolor: "#1976d2", width: 56, height: 56, mr: 2 }} 
+                            src={customer.avatarUrl || undefined}
+                        >
                             {customer.fullName.charAt(0)}
                         </Avatar>
                         <Box>
@@ -161,7 +288,7 @@ const CustomerDetails: React.FC = () => {
             </Paper>
 
             <Grid container spacing={3}>
-                {/* Personal Information (unchanged) */}
+                {/* Personal Information */}
                 <Grid item xs={12} md={6}>
                     <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
                         <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, display: "flex", alignItems: "center" }}>
@@ -170,30 +297,100 @@ const CustomerDetails: React.FC = () => {
                         </Typography>
                         <Stack spacing={3}>
                             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <TextField label="First Name" value={customer.lastName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
-                                <TextField label="Middle Name" value={customer.firstName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
-                                <TextField label="Last Name" value={customer.firstName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
+                                <TextField label="First Name" value={customer.firstName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
+                                <TextField label="Middle Name" value={customer.middleName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
+                                <TextField label="Last Name" value={customer.lastName} InputProps={{ readOnly: true }} size="small" sx={{ width: "30%" }} />
                             </Box>
                             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                                 <TextField label="Gender" value={customer.gender} InputProps={{ readOnly: true }} size="small" sx={{ width: "48%" }} />
-                                <TextField label="Date of Birth" value={customer.dateOfBirth.split("T")[0]} InputProps={{ readOnly: true }} size="small" sx={{ width: "48%" }} />
+                                <TextField
+                                    label="Date of Birth"
+                                    value={customer.dateOfBirth ? customer.dateOfBirth.split("T")[0] : ""}
+                                    InputProps={{ readOnly: true }}
+                                    size="small"
+                                    sx={{ width: "48%" }}
+                                />
                             </Box>
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <TextField label="Phone Number" value={customer.phone} InputProps={{ readOnly: true, endAdornment: (
-                                    <Tooltip title="Copy"><IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.phone)}><CopyIcon fontSize="small" /></IconButton></Tooltip>
-                                )}} size="small" sx={{ width: "48%" }} />
-                                <TextField label="Email" value={customer.email} InputProps={{ readOnly: true, endAdornment: (
-                                    <Tooltip title="Copy"><IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.email)}><CopyIcon fontSize="small" /></IconButton></Tooltip>
-                                )}} size="small" sx={{ width: "48%" }} />
+                                <TextField
+                                    label="Phone Number"
+                                    value={customer.phoneNumber}
+                                    InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <Tooltip title="Copy">
+                                                <IconButton
+                                                    edge="end"
+                                                    size="small"
+                                                    onClick={() => copyToClipboard(customer.phoneNumber)}
+                                                >
+                                                    <CopyIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ),
+                                    }}
+                                    size="small"
+                                    sx={{ width: "48%" }}
+                                />
+                                <TextField
+                                    label="Email"
+                                    value={customer.email}
+                                    InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <Tooltip title="Copy">
+                                                <IconButton
+                                                    edge="end"
+                                                    size="small"
+                                                    onClick={() => copyToClipboard(customer.email)}
+                                                >
+                                                    <CopyIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ),
+                                    }}
+                                    size="small"
+                                    sx={{ width: "48%" }}
+                                />
                             </Box>
                             <Divider textAlign="left">Address Information</Divider>
-                            <TextField label="Address" value={customer.address} InputProps={{ readOnly: true }} size="small" fullWidth />
+                            <TextField
+                                label="Address"
+                                value={customer.homeAddress}
+                                InputProps={{ readOnly: true }}
+                                size="small"
+                                fullWidth
+                            />
                             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <TextField label="Province/City" value={customer.province} InputProps={{ readOnly: true }} size="small" sx={{ width: "32%" }} />
-                                <TextField label="District" value={customer.district} InputProps={{ readOnly: true }} size="small" sx={{ width: "32%" }} />
-                                <TextField label="Ward" value={customer.ward} InputProps={{ readOnly: true }} size="small" sx={{ width: "32%" }} />
+                                <TextField
+                                    label="Province/City"
+                                    value={customer.province}
+                                    InputProps={{ readOnly: true }}
+                                    size="small"
+                                    sx={{ width: "32%" }}
+                                />
+                                <TextField
+                                    label="District"
+                                    value={customer.district}
+                                    InputProps={{ readOnly: true }}
+                                    size="small"
+                                    sx={{ width: "32%" }}
+                                />
+                                <TextField
+                                    label="Ward"
+                                    value={customer.ward}
+                                    InputProps={{ readOnly: true }}
+                                    size="small"
+                                    sx={{ width: "32%" }}
+                                />
                             </Box>
-                            <TextField label="Country" value={customer.nation} InputProps={{ readOnly: true }} size="small" sx={{ width: "48%" }} />
+                            <TextField
+                                label="Country"
+                                value={customer.nation}
+                                InputProps={{ readOnly: true }}
+                                size="small"
+                                sx={{ width: "48%" }}
+                            />
                         </Stack>
                     </Paper>
                 </Grid>
@@ -212,12 +409,16 @@ const CustomerDetails: React.FC = () => {
                             </Typography>
                             <TextField
                                 fullWidth
-                                value={customer.idNumber}
+                                value={customer.idNumber || "Not provided"}
                                 InputProps={{
                                     readOnly: true,
-                                    endAdornment: (
+                                    endAdornment: customer.idNumber && (
                                         <Tooltip title="Copy">
-                                            <IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.idNumber)}>
+                                            <IconButton
+                                                edge="end"
+                                                size="small"
+                                                onClick={() => copyToClipboard(customer.idNumber || "")}
+                                            >
                                                 <CopyIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
@@ -231,39 +432,45 @@ const CustomerDetails: React.FC = () => {
                             <Grid item xs={12}>
                                 <TextField
                                     label="Front ID URL"
-                                    value={customer.idCardFrontImgUrl}
+                                    value={customer.idCardFrontImgUrl || "Not provided"}
                                     fullWidth
                                     InputProps={{
                                         readOnly: true,
-                                        endAdornment: (
+                                        endAdornment: customer.idCardFrontImgUrl && (
                                             <Tooltip title="Copy">
-                                                <IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.idCardFrontImgUrl)}>
+                                                <IconButton
+                                                    edge="end"
+                                                    size="small"
+                                                    onClick={() => copyToClipboard(customer.idCardFrontImgUrl || "")}
+                                                >
                                                     <CopyIcon fontSize="small" />
                                                 </IconButton>
                                             </Tooltip>
                                         ),
                                     }}
                                     size="small"
-                                    
                                 />
                             </Grid>
                             <Grid item xs={12}>
                                 <TextField
                                     label="Back ID URL"
-                                    value={customer.idCardBackImgUrl}
+                                    value={customer.idCardBackImgUrl || "Not provided"}
                                     fullWidth
                                     InputProps={{
                                         readOnly: true,
-                                        endAdornment: (
+                                        endAdornment: customer.idCardBackImgUrl && (
                                             <Tooltip title="Copy">
-                                                <IconButton edge="end" size="small" onClick={() => copyToClipboard(customer.idCardBackImgUrl)}>
+                                                <IconButton
+                                                    edge="end"
+                                                    size="small"
+                                                    onClick={() => copyToClipboard(customer.idCardBackImgUrl || "")}
+                                                >
                                                     <CopyIcon fontSize="small" />
                                                 </IconButton>
                                             </Tooltip>
                                         ),
                                     }}
                                     size="small"
-                                    
                                 />
                             </Grid>
                         </Grid>
@@ -281,13 +488,63 @@ const CustomerDetails: React.FC = () => {
 
             {/* Footer */}
             <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 4 }}>
-                <Button variant="outlined" color="secondary" onClick={() => router.push('/customer-management')}>
+                <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => router.push("/customer-management")}
+                >
                     Back
                 </Button>
-                <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSave} sx={{ borderRadius: 2 }}>
+                <Button
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                    onClick={handleSaveClick}
+                    sx={{ borderRadius: 2 }}
+                >
                     Save Changes
                 </Button>
             </Box>
+
+            {/* Confirm Dialog */}
+            <Dialog
+                open={openConfirmDialog}
+                onClose={handleCloseConfirmDialog}
+            >
+                <DialogTitle>Confirm Save</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to save changes to the KYC status for {customer.fullName} (ID: {customer.id})?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseConfirmDialog} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmSave} color="primary" autoFocus>
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Result Dialog */}
+            <Dialog
+                open={openResultDialog}
+                onClose={handleCloseResultDialog}
+            >
+                <DialogTitle>{saveResult === "success" ? "Success" : "Failed"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        {saveResult === "success"
+                            ? "KYC status has been updated successfully."
+                            : "Failed to update KYC status. Please try again."}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseResultDialog} color="primary">
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
