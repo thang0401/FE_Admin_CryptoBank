@@ -4,15 +4,15 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz"
 import PendingActionsIcon from "@mui/icons-material/PendingActions"
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"
-import { Stats } from "src/types/orders-management/order"
+import type { Stats } from "src/types/orders-management/order"
 import { StyledCard } from "./StyledComponents"
-
 
 interface StatsCardsProps {
   stats: Stats
+  orderType?: "buy" | "sell"
 }
 
-const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
+const StatsCards: React.FC<StatsCardsProps> = ({ stats, orderType }) => {
   return (
     <Grid container spacing={3} mb={4}>
       <Grid item xs={12} sm={6} md={3}>
@@ -31,7 +31,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Total Orders
+                Total {orderType === "buy" ? "Buy" : orderType === "sell" ? "Sell" : ""} Orders
               </Typography>
               <Typography variant="h5" fontWeight="bold">
                 {stats.totalOrders}
@@ -83,10 +83,10 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Buy Volume (USDC)
+                {orderType === "buy" ? "Buy" : "Sell"} Volume (USDC)
               </Typography>
               <Typography variant="h5" fontWeight="bold">
-                {stats.totalBuyVolume}
+                {orderType === "buy" ? stats.totalBuyVolume : stats.totalSellVolume}
               </Typography>
             </Box>
           </Box>
@@ -98,10 +98,10 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
           <Box display="flex" alignItems="center">
             <Box
               sx={{
-                bgcolor: "rgba(211, 47, 47, 0.1)",
+                bgcolor: "rgba(46, 125, 50, 0.1)",
                 p: 1.5,
                 borderRadius: "12px",
-                color: "error.main",
+                color: "success.main",
                 mr: 2,
               }}
             >
@@ -109,10 +109,10 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Sell Volume (USDC)
+                Approved Orders
               </Typography>
               <Typography variant="h5" fontWeight="bold">
-                {stats.totalSellVolume}
+                {stats.approvedOrders}
               </Typography>
             </Box>
           </Box>
@@ -123,4 +123,3 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
 }
 
 export default StatsCards
-

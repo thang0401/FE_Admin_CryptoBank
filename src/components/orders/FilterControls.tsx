@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import {
   Box,
@@ -20,7 +22,6 @@ import SearchIcon from "@mui/icons-material/Search"
 import RefreshIcon from "@mui/icons-material/Refresh"
 import FilterListIcon from "@mui/icons-material/FilterList"
 
-
 interface FilterControlsProps {
   tabValue: number
   searchTerm: string
@@ -36,6 +37,7 @@ interface FilterControlsProps {
   handleStartDateChange: (date: Date | null) => void
   handleEndDateChange: (date: Date | null) => void
   handleRefresh: () => void
+  hideTypeFilter?: boolean
 }
 
 const FilterControls: React.FC<FilterControlsProps> = ({
@@ -53,6 +55,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   handleStartDateChange,
   handleEndDateChange,
   handleRefresh,
+  hideTypeFilter = false,
 }) => {
   return (
     <>
@@ -94,56 +97,56 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             Filters
           </Typography>
           <Grid container spacing={2}>
-          {tabValue !==0 &&(                
-            <Grid item xs={12} sm={6} md={3}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="status-filter-label">Status</InputLabel>
-                  <Select
-                    labelId="status-filter-label"
-                    value={filterStatus}
-                    label="Status"
-                    onChange={handleStatusFilterChange as any}
-                    >
-                    <MenuItem value="all">All Statuses</MenuItem>
-                    <MenuItem value="approved">Approved</MenuItem>
-                    <MenuItem value="rejected">Rejected</MenuItem>
-                  </Select>
-                </FormControl>
-            </Grid>
-            )}
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={hideTypeFilter ? 4 : 3}>
               <FormControl fullWidth size="small">
-                <InputLabel id="type-filter-label">Type</InputLabel>
+                <InputLabel id="status-filter-label">Status</InputLabel>
                 <Select
-                  labelId="type-filter-label"
-                  value={filterType}
-                  label="Type"
-                  onChange={handleTypeFilterChange as any}
+                  labelId="status-filter-label"
+                  value={filterStatus}
+                  label="Status"
+                  onChange={handleStatusFilterChange as any}
                 >
-                  <MenuItem value="all">All Types</MenuItem>
-                  <MenuItem value="buy">Buy</MenuItem>
-                  <MenuItem value="sell">Sell</MenuItem>
+                  <MenuItem value="all">All Statuses</MenuItem>
+                  <MenuItem value="approved">Approved</MenuItem>
+                  <MenuItem value="rejected">Rejected</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            {!hideTypeFilter && (
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="type-filter-label">Type</InputLabel>
+                  <Select
+                    labelId="type-filter-label"
+                    value={filterType}
+                    label="Type"
+                    onChange={handleTypeFilterChange as any}
+                  >
+                    <MenuItem value="all">All Types</MenuItem>
+                    <MenuItem value="buy">Buy</MenuItem>
+                    <MenuItem value="sell">Sell</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+            <Grid item xs={12} sm={6} md={hideTypeFilter ? 4 : 3}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="Start Date"
                   value={startDate}
                   onChange={handleStartDateChange}
-                  format="dd/MM/yyyy" // Thêm định dạng ngày
+                  format="dd/MM/yyyy"
                   slotProps={{ textField: { size: "small", fullWidth: true } }}
                 />
               </LocalizationProvider>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={hideTypeFilter ? 4 : 3}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="End Date"
                   value={endDate}
                   onChange={handleEndDateChange}
-                  format="dd/MM/yyyy" // Thêm định dạng ngày
+                  format="dd/MM/yyyy"
                   slotProps={{ textField: { size: "small", fullWidth: true } }}
                   minDate={startDate || undefined}
                 />

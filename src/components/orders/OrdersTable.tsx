@@ -16,7 +16,7 @@ import {
   TableSortLabel,
 } from "@mui/material"
 import VisibilityIcon from "@mui/icons-material/Visibility"
-import { Order } from "src/types/orders-management/order"
+import type { Order } from "src/types/orders-management/order"
 import StatusChip from "./StatusChip"
 import { CryptoIcon, StyledTableContainer } from "./StyledComponents"
 import { useEffect, useState } from "react"
@@ -29,6 +29,8 @@ interface OrdersTableProps {
   handleChangePage: (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => void
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void
   handleViewOrder: (order: Order) => void
+  // New prop to hide type column
+  hideTypeColumn?: boolean
 }
 
 const formatDate = (dateString: string): string => {
@@ -44,7 +46,7 @@ const formatDate = (dateString: string): string => {
 
 const USDCIcon = () => (
   <CryptoIcon>
-    <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=024" alt="USDC" width={24} height={24} />
+    <img src="https://static.vecteezy.com/system/resources/previews/044/626/814/non_2x/usdc-logo-on-transparent-background-free-vector.jpg" alt="USDC" width={43} height={43} />
   </CryptoIcon>
 )
 
@@ -58,34 +60,35 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   handleChangePage,
   handleChangeRowsPerPage,
   handleViewOrder,
+  hideTypeColumn = false,
 }) => {
   const [sortConfig, setSortConfig] = useState<{
-    column: 'date' | 'amount' | 'total' | null
-    direction: 'asc' | 'desc'
-  }>({ column: null, direction: 'asc' })
-  
+    column: "date" | "amount" | "total" | null
+    direction: "asc" | "desc"
+  }>({ column: null, direction: "asc" })
+
   const [sortedOrders, setSortedOrders] = useState<Order[]>(filteredOrders)
 
-  const handleSort = (column: 'date' | 'amount' | 'total') => {
+  const handleSort = (column: "date" | "amount" | "total") => {
     const isActive = sortConfig.column === column
-    const newDirection = isActive && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+    const newDirection = isActive && sortConfig.direction === "asc" ? "desc" : "asc"
     setSortConfig({ column, direction: newDirection })
 
     const sorted = [...filteredOrders].sort((a, b) => {
-      if (column === 'date') {
+      if (column === "date") {
         const dateA = new Date(a.createdAt).getTime()
         const dateB = new Date(b.createdAt).getTime()
-        return newDirection === 'asc' ? dateA - dateB : dateB - dateA
+        return newDirection === "asc" ? dateA - dateB : dateB - dateA
       }
-      if (column === 'amount') {
-        const amountA = parseFloat(a.amount)
-        const amountB = parseFloat(b.amount)
-        return newDirection === 'asc' ? amountA - amountB : amountB - amountA
+      if (column === "amount") {
+        const amountA = Number.parseFloat(a.amount)
+        const amountB = Number.parseFloat(b.amount)
+        return newDirection === "asc" ? amountA - amountB : amountB - amountA
       }
-      if (column === 'total') {
-        const totalA = parseFloat(a.total)
-        const totalB = parseFloat(b.total)
-        return newDirection === 'asc' ? totalA - totalB : totalB - totalA
+      if (column === "total") {
+        const totalA = Number.parseFloat(a.total)
+        const totalB = Number.parseFloat(b.total)
+        return newDirection === "asc" ? totalA - totalB : totalB - totalA
       }
       return 0
     })
@@ -111,31 +114,31 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
-              <TableCell>Type</TableCell>
+              {!hideTypeColumn && <TableCell>Type</TableCell>}
               <TableCell>User</TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={sortConfig.column === 'amount'}
-                  direction={sortConfig.column === 'amount' ? sortConfig.direction : 'asc'}
-                  onClick={() => handleSort('amount')}
+                  active={sortConfig.column === "amount"}
+                  direction={sortConfig.column === "amount" ? sortConfig.direction : "asc"}
+                  onClick={() => handleSort("amount")}
                 >
                   Amount
                 </TableSortLabel>
               </TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={sortConfig.column === 'total'}
-                  direction={sortConfig.column === 'total' ? sortConfig.direction : 'asc'}
-                  onClick={() => handleSort('total')}
+                  active={sortConfig.column === "total"}
+                  direction={sortConfig.column === "total" ? sortConfig.direction : "asc"}
+                  onClick={() => handleSort("total")}
                 >
                   Total
                 </TableSortLabel>
               </TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={sortConfig.column === 'date'}
-                  direction={sortConfig.column === 'date' ? sortConfig.direction : 'asc'}
-                  onClick={() => handleSort('date')}
+                  active={sortConfig.column === "date"}
+                  direction={sortConfig.column === "date" ? sortConfig.direction : "asc"}
+                  onClick={() => handleSort("date")}
                 >
                   Date
                 </TableSortLabel>
@@ -149,14 +152,16 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
               sortedOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((order) => (
                 <TableRow key={order.id} hover>
                   <TableCell>#{order.id}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={order.type === "buy" ? "Buy" : "Sell"}
-                      size="small"
-                      color={order.type === "buy" ? "primary" : "error"}
-                      sx={{ fontWeight: "medium" }}
-                    />
-                  </TableCell>
+                  {!hideTypeColumn && (
+                    <TableCell>
+                      <Chip
+                        label={order.type === "buy" ? "Buy" : "Sell"}
+                        size="small"
+                        color={order.type === "buy" ? "primary" : "error"}
+                        sx={{ fontWeight: "medium" }}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Box>
                       <Typography variant="body2" fontWeight="medium">
@@ -192,7 +197,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={hideTypeColumn ? 7 : 8} align="center" sx={{ py: 3 }}>
                   <Typography variant="body1" color="text.secondary">
                     No orders found matching your criteria
                   </Typography>
