@@ -29,11 +29,13 @@ import {
   Stack,
   Alert,
   Snackbar,
-  SelectChangeEvent,
+  Tabs,
+  Tab,
+  InputAdornment,
+  type SelectChangeEvent,
 } from "@mui/material"
 import { useRouter } from "next/router" // Page Router
 import { ArrowLeft, Edit, Save, Plus, X, Camera, Trash2 } from "lucide-react"
-import { color } from "@mui/system"
 
 // Updated interface to match the new requirements
 interface Role {
@@ -51,18 +53,32 @@ interface User {
   gender: "male" | "female" | "other"
   dateOfBirth: string
   kycStatus: "verified" | "pending" | "rejected" | "not_submitted"
-  status: StatusType;
+  status: StatusType
   roles: Role[]
   avatar: string
+  // Additional fields from AddEmployeeDialog
+  employment_type?: string
+  hire_date?: string
+  termination_date?: string | null
+  salary?: number
+  bonus?: number
+  marital_status?: string
+  billing?: string
+  bank_account?: string
+  bank_name?: string
+  insurance_number?: string
+  tax_code?: string
+  emergency_contact_name?: string
+  emergency_contact_phone?: string
 }
 
-type StatusType = "active" | "inactive" | "suspended" | "deleted";
+type StatusType = "active" | "inactive" | "suspended" | "deleted"
 
 const statusOptions = [
-  { value: "active", label: "Active", color: "#4caf50" },    
-  { value: "inactive", label: "Inactive", color: "#9e9e9e" }, 
-  { value: "suspended", label: "Suspended", color: "#ff9800" }, 
-  { value: "deleted", label: "Deleted", color: "#f44336" },   
+  { value: "active", label: "Active", color: "#4caf50" },
+  { value: "inactive", label: "Inactive", color: "#9e9e9e" },
+  { value: "suspended", label: "Suspended", color: "#ff9800" },
+  { value: "deleted", label: "Deleted", color: "#f44336" },
 ]
 
 const kycStatusOptions = [
@@ -71,6 +87,36 @@ const kycStatusOptions = [
   { value: "rejected", label: "Rejected", color: "#f44336" },
   { value: "not_submitted", label: "Not Submitted", color: "#9e9e9e" },
 ]
+
+// Tab Panel component
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`user-tabpanel-${index}`}
+      aria-labelledby={`user-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+    </div>
+  )
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `user-tab-${index}`,
+    "aria-controls": `user-tabpanel-${index}`,
+  }
+}
 
 const EmployeeDetails = () => {
   const theme = useTheme()
@@ -83,6 +129,7 @@ const EmployeeDetails = () => {
   const [error, setError] = useState<string | null>(null)
   const [editMode, setEditMode] = useState(false)
   const [availableRoles, setAvailableRoles] = useState<Role[]>([])
+  const [tabValue, setTabValue] = useState(0)
 
   // Dialog states
   const [openRoleDialog, setOpenRoleDialog] = useState(false)
@@ -97,6 +144,11 @@ const EmployeeDetails = () => {
     message: "",
     severity: "success" as "success" | "error" | "info" | "warning",
   })
+
+  // Handle tab change
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue)
+  }
 
   // Fetch user information based on id
   useEffect(() => {
@@ -131,6 +183,20 @@ const EmployeeDetails = () => {
             { id: "2", name: "Editor", description: "Can edit content" },
           ],
           avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+          // Additional mock data for employment details
+          employment_type: "Full-time",
+          hire_date: "2022-03-15",
+          termination_date: null,
+          salary: 5000000,
+          bonus: 500000,
+          marital_status: "Single",
+          billing: "Bank Transfer",
+          bank_account: "9876543210",
+          bank_name: "VietcomBank",
+          insurance_number: "INS123456789",
+          tax_code: "TAX987654321",
+          emergency_contact_name: "Jane Doe",
+          emergency_contact_phone: "+1 (555) 987-6543",
         }
 
         setUser(mockUser)
@@ -159,16 +225,27 @@ const EmployeeDetails = () => {
 
   // Handle field changes
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>,
   ) => {
-    const { name, value } = e.target;
-    if (!name || !user) return;
-  
+    const { name, value } = e.target
+    if (!name || !user) return
+
     setUser({
       ...user,
-      [name]: value as StatusType, // Ép kiểu về StatusType
-    });
-  };
+      [name]: value,
+    })
+  }
+
+  // Handle number field changes
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    if (!name || !user) return
+
+    setUser({
+      ...user,
+      [name]: value === "" ? 0 : Number(value),
+    })
+  }
 
   // Handle save changes
   const handleSave = async () => {
@@ -394,7 +471,7 @@ const EmployeeDetails = () => {
         </Box>
 
         <Grid container spacing={3}>
-          {/* Left column - Avatar and basic info */}
+          {/* Left column - Avatar and basic info - UNCHANGED */}
           <Grid item xs={12} md={4}>
             <Card sx={{ p: 3, height: "100%", boxShadow: theme.shadows[5], borderRadius: 2 }}>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
@@ -526,187 +603,408 @@ const EmployeeDetails = () => {
             </Card>
           </Grid>
 
-          {/* Right column - Detailed information */}
+          {/* Right column - Tabbed interface */}
           <Grid item xs={12} md={8}>
             <Card sx={{ p: 3, boxShadow: theme.shadows[5], borderRadius: 2 }}>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                Personal Information
-              </Typography>
+              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                <Tabs value={tabValue} onChange={handleTabChange} aria-label="user information tabs">
+                  <Tab label="Personal Information" {...a11yProps(0)} />
+                  <Tab label="Employment Details" {...a11yProps(1)} />
+                </Tabs>
+              </Box>
 
-              <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Full Name"
-                    name="fullName"
-                    value={user.fullName}
-                    onChange={handleChange}
-                    InputProps={{ readOnly: true}}
-                    variant={editMode ? "outlined" : "filled"}
-                  />
+              {/* Tab 1: Personal Information and Account Status */}
+              <TabPanel value={tabValue} index={0}>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Personal Information
+                </Typography>
+
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Full Name"
+                      name="fullName"
+                      value={user.fullName}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Username"
+                      name="username"
+                      value={user.username}
+                      InputProps={{ readOnly: true }}
+                      variant="filled"
+                      helperText="Username cannot be changed"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Email Address"
+                      name="email"
+                      type="email"
+                      value={user.email}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Phone Number"
+                      name="phoneNumber"
+                      value={user.phoneNumber}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Date of Birth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={user.dateOfBirth}
+                      onChange={handleChange}
+                      InputProps={{
+                        readOnly: !editMode,
+                        inputProps: { max: new Date().toISOString().split("T")[0] },
+                      }}
+                      InputLabelProps={{ shrink: true }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
+                      <InputLabel id="gender-label">Gender</InputLabel>
+                      <Select
+                        labelId="gender-label"
+                        name="gender"
+                        value={user.gender}
+                        onChange={handleChange}
+                        label="Gender"
+                        inputProps={{ readOnly: !editMode }}
+                      >
+                        <MenuItem value="male">Male</MenuItem>
+                        <MenuItem value="female">Female</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Username"
-                    name="username"
-                    value={user.username}
-                    InputProps={{ readOnly: true }}
-                    variant="filled"
-                    helperText="Username cannot be changed"
-                  />
+                <Divider sx={{ my: 3 }} />
+
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Account Status
+                </Typography>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
+                      <InputLabel id="status-label">Account Status</InputLabel>
+                      <Select
+                        labelId="status-label"
+                        name="status"
+                        value={user.status}
+                        onChange={handleChange}
+                        label="Account Status"
+                        inputProps={{ readOnly: !editMode }}
+                        renderValue={(selected) => (
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                borderRadius: "50%",
+                                backgroundColor: statusOptions.find((opt) => opt.value === selected)?.color,
+                                mr: 1,
+                              }}
+                            />
+                            {statusOptions.find((opt) => opt.value === selected)?.label}
+                          </Box>
+                        )}
+                      >
+                        {statusOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Box
+                                sx={{
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: "50%",
+                                  backgroundColor: option.color,
+                                  mr: 1,
+                                }}
+                              />
+                              {option.label}
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth variant="filled">
+                      <InputLabel id="kyc-status-label">KYC Status</InputLabel>
+                      <Select
+                        labelId="kyc-status-label"
+                        name="kycStatus"
+                        value={user.kycStatus}
+                        label="KYC Status"
+                        inputProps={{ readOnly: true }}
+                      >
+                        {kycStatusOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                        KYC status can only be changed through the verification process
+                      </Typography>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              </TabPanel>
+
+              {/* Tab 2: Employment Details */}
+              <TabPanel value={tabValue} index={1}>
+                {/* Job Information */}
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Job Information
+                </Typography>
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
+                      <InputLabel>Employment Type</InputLabel>
+                      <Select
+                        name="employment_type"
+                        value={user.employment_type || ""}
+                        label="Employment Type"
+                        onChange={handleChange}
+                        inputProps={{ readOnly: !editMode }}
+                      >
+                        <MenuItem value="Full-time">Full-time</MenuItem>
+                        <MenuItem value="Part-time">Part-time</MenuItem>
+                        <MenuItem value="Contract">Contract</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        name="status"
+                        value={user.status}
+                        label="Status"
+                        onChange={handleChange}
+                        inputProps={{ readOnly: !editMode }}
+                      >
+                        <MenuItem value="active">Active</MenuItem>
+                        <MenuItem value="inactive">Inactive</MenuItem>
+                        <MenuItem value="suspended">Suspended</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Hire Date"
+                      name="hire_date"
+                      type="date"
+                      value={user.hire_date || ""}
+                      onChange={handleChange}
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Termination Date"
+                      name="termination_date"
+                      type="date"
+                      value={user.termination_date || ""}
+                      onChange={handleChange}
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Email Address"
-                    name="email"
-                    type="email"
-                    value={user.email}
-                    onChange={handleChange}
-                    InputProps={{ readOnly: true}}
-                    variant={editMode ? "outlined" : "filled"}
-                  />
+                <Divider sx={{ my: 3 }} />
+
+                {/* Financial Information */}
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Financial Information
+                </Typography>
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Base Salary"
+                      name="salary"
+                      type="number"
+                      value={user.salary || 0}
+                      onChange={handleNumberChange}
+                      InputProps={{
+                        readOnly: !editMode,
+                        startAdornment: <InputAdornment position="start">VND</InputAdornment>,
+                      }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Bonus"
+                      name="bonus"
+                      type="number"
+                      value={user.bonus || 0}
+                      onChange={handleNumberChange}
+                      InputProps={{
+                        readOnly: !editMode,
+                        startAdornment: <InputAdornment position="start">VND</InputAdornment>,
+                      }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
+                      <InputLabel>Payment Method</InputLabel>
+                      <Select
+                        name="billing"
+                        value={user.billing || ""}
+                        label="Payment Method"
+                        onChange={handleChange}
+                        inputProps={{ readOnly: !editMode }}
+                      >
+                        <MenuItem value="Auto Debit">Auto Debit</MenuItem>
+                        <MenuItem value="Cash">Cash</MenuItem>
+                        <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
+                        <MenuItem value="Credit Card">Credit Card</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
+                      <InputLabel>Marital Status</InputLabel>
+                      <Select
+                        name="marital_status"
+                        value={user.marital_status || ""}
+                        label="Marital Status"
+                        onChange={handleChange}
+                        inputProps={{ readOnly: !editMode }}
+                      >
+                        <MenuItem value="Single">Single</MenuItem>
+                        <MenuItem value="Married">Married</MenuItem>
+                        <MenuItem value="Divorced">Divorced</MenuItem>
+                        <MenuItem value="Widowed">Widowed</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    name="phoneNumber"
-                    value={user.phoneNumber}
-                    onChange={handleChange}
-                    InputProps={{ readOnly: true}}
-                    variant={editMode ? "outlined" : "filled"}
-                  />
+                <Divider sx={{ my: 3 }} />
+
+                {/* Bank & Legal Information */}
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Bank & Legal Information
+                </Typography>
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Bank Account Number"
+                      name="bank_account"
+                      value={user.bank_account || ""}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Bank Name"
+                      name="bank_name"
+                      value={user.bank_name || ""}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Insurance Number"
+                      name="insurance_number"
+                      value={user.insurance_number || ""}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Tax Code"
+                      name="tax_code"
+                      value={user.tax_code || ""}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Date of Birth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={user.dateOfBirth}
-                    onChange={handleChange}
-                    InputProps={{
-                      readOnly: true,
-                      inputProps: { max: new Date().toISOString().split("T")[0] },
-                    }}
-                    InputLabelProps={{ shrink: true }}
-                    variant={editMode ? "outlined" : "filled"}
-                  />
+                <Divider sx={{ my: 3 }} />
+
+                {/* Emergency Contact Information */}
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Emergency Contact Information
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Contact Name"
+                      name="emergency_contact_name"
+                      value={user.emergency_contact_name || ""}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Phone Number"
+                      name="emergency_contact_phone"
+                      value={user.emergency_contact_phone || ""}
+                      onChange={handleChange}
+                      InputProps={{ readOnly: !editMode }}
+                      variant={editMode ? "outlined" : "filled"}
+                    />
+                  </Grid>
                 </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
-                    <InputLabel id="gender-label">Gender</InputLabel>
-                    <Select
-                      labelId="gender-label"
-                      name="gender"
-                      value={user.gender}
-                      onChange={(e) => handleChange}
-                      label="Gender"
-                      inputProps={{ readOnly: true }}
-                    >
-                      <MenuItem value="male">Male</MenuItem>
-                      <MenuItem value="female">Female</MenuItem>
-                      <MenuItem value="other">Other</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-
-              <Divider sx={{ my: 3 }} />
-
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                Account Status
-              </Typography>
-
-              <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth variant={editMode ? "outlined" : "filled"}>
-                  <InputLabel id="status-label">Account Status</InputLabel>
-                  <Select
-                    labelId="status-label"
-                    name="status"
-                    value={user.status}
-                    onChange={handleChange} // Gắn trực tiếp handleChange
-                    label="Account Status"
-                    inputProps={{ readOnly: !editMode }}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Box
-                          sx={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: "50%",
-                            backgroundColor: statusOptions.find((opt) => opt.value === selected)?.color,
-                            mr: 1,
-                          }}
-                        />
-                        {statusOptions.find((opt) => opt.value === selected)?.label}
-                      </Box>
-                    )}
-                  >
-                    {statusOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <Box
-                            sx={{
-                              width: 12,
-                              height: 12,
-                              borderRadius: "50%",
-                              backgroundColor: option.color,
-                              mr: 1,
-                            }}
-                          />
-                          {option.label}
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth variant="filled">
-                    <InputLabel id="kyc-status-label">KYC Status</InputLabel>
-                    <Select
-                      labelId="kyc-status-label"
-                      name="kycStatus"
-                      value={user.kycStatus}
-                      label="KYC Status"
-                      inputProps={{ readOnly: true }}
-                    >
-                      {kycStatusOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                      KYC status can only be changed through the verification process
-                    </Typography>
-                  </FormControl>
-                </Grid>
-              </Grid>
-
-              {/* <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
-                {editMode && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setOpenUpdateDialog(true)}
-                    startIcon={<Save size={18} />}
-                    disabled={saving}
-                  >
-                    {saving ? <CircularProgress size={24} /> : "Save Changes"}
-                  </Button>
-                )}
-              </Box> */}
+              </TabPanel>
             </Card>
           </Grid>
         </Grid>
@@ -822,4 +1120,3 @@ const EmployeeDetails = () => {
 }
 
 export default EmployeeDetails
-
