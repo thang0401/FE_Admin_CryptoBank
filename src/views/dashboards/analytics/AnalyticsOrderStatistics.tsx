@@ -25,8 +25,8 @@ import ReactApexcharts from 'src/@core/components/react-apexcharts'
 
 interface DataType {
   title: string
-  subtitle: string
-  avatarIcon: ReactNode
+  //subtitle: string
+  //avatarIcon: ReactNode
   amount: string | number
   avatarColor: ThemeColor
 }
@@ -34,31 +34,31 @@ interface DataType {
 const data: DataType[] = [
   {
     amount: '82.5k',
-    title: 'Electronic',
+    title: 'Giao dịch thành công',
     avatarColor: 'primary',
-    subtitle: 'Mobile, Earbuds, TV',
-    avatarIcon: <Icon icon='bx:mobile-alt' />
+    //subtitle: 'Mobile, Earbuds, TV',
+    //avatarIcon: <Icon icon='bx:mobile-alt' />
   },
   {
     amount: '23.8k',
-    title: 'Fashion',
+    title: 'Giao dịch thất bại',
     avatarColor: 'success',
-    subtitle: 'Tshirt, Jeans, Shoes',
-    avatarIcon: <Icon icon='bx:closet' />
+    //subtitle: 'Tshirt, Jeans, Shoes',
+    //avatarIcon: <Icon icon='bx:closet' />
   },
   {
     amount: 849,
-    title: 'Decor',
+    title: 'Giao dịch đang được sử lý',
     avatarColor: 'info',
-    subtitle: 'Fine Art, Dining',
-    avatarIcon: <Icon icon='bx:home' />
+    //subtitle: 'Fine Art, Dining',
+    //avatarIcon: <Icon icon='bx:home' />
   },
   {
     amount: 99,
-    title: 'Sports',
+    title: 'Giao dịch đang tranh chấp',
     avatarColor: 'secondary',
-    subtitle: 'Football, Cricket Kit',
-    avatarIcon: <Icon icon='bx:football' />
+    //subtitle: 'Football, Cricket Kit',
+    //avatarIcon: <Icon icon='bx:football' />
   }
 ]
 
@@ -78,7 +78,7 @@ const AnalyticsOrderStatistics = () => {
     legend: { show: false },
     tooltip: { enabled: false },
     dataLabels: { enabled: false },
-    labels: ['Fashion', 'Electronic', 'Sports', 'Decor'],
+    labels: ['Thành công', 'Thất bại', 'Đang xử lý', 'Đang tranh chấp'],
     colors: [
       theme.palette.success.main,
       theme.palette.primary.main,
@@ -136,7 +136,7 @@ const AnalyticsOrderStatistics = () => {
     <Card>
       <CardHeader
         sx={{ pb: 2.5 }}
-        title='Order Statistics'
+        title='Tỷ lệ giao dịch thành công và thất bại'
         subheader='42.82k Total Sales'
         subheaderTypographyProps={{ sx: { color: 'text.disabled' } }}
         action={<OptionsMenu iconButtonProps={{ size: 'small' }} options={['Share', 'Refresh', 'Edit']} />}
@@ -147,7 +147,7 @@ const AnalyticsOrderStatistics = () => {
             <Typography variant='h4' sx={{ mb: 0.5 }}>
               8,258
             </Typography>
-            <Typography sx={{ color: 'text.secondary' }}>Total Orders</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>Tổng số giao dịch</Typography>
           </Box>
           <ReactApexcharts type='donut' width={110} height={125} options={options} series={[45, 80, 20, 40]} />
         </Box>
@@ -161,14 +161,14 @@ const AnalyticsOrderStatistics = () => {
                 mb: index !== data.length - 1 ? 5.5 : undefined
               }}
             >
-              <CustomAvatar
+              {/* <CustomAvatar
                 skin='light'
                 variant='rounded'
                 color={item.avatarColor}
                 sx={{ mr: 3, width: 38, height: 38 }}
               >
                 {item.avatarIcon}
-              </CustomAvatar>
+              </CustomAvatar> */}
               <Box
                 sx={{
                   width: '100%',
@@ -180,9 +180,9 @@ const AnalyticsOrderStatistics = () => {
               >
                 <Box sx={{ mr: 2, display: 'flex', flexDirection: 'column' }}>
                   <Typography sx={{ fontWeight: 500 }}>{item.title}</Typography>
-                  <Typography variant='body2' sx={{ color: 'text.disabled' }}>
+                  {/* <Typography variant='body2' sx={{ color: 'text.disabled' }}>
                     {item.subtitle}
-                  </Typography>
+                  </Typography> */}
                 </Box>
                 <Typography variant='body2' sx={{ fontWeight: 500 }}>
                   {item.amount}

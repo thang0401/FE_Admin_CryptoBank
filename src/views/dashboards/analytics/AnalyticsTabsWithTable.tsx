@@ -23,151 +23,158 @@ import MuiTabList, { TabListProps } from '@mui/lab/TabList'
 import { ThemeColor } from 'src/@core/layouts/types'
 
 interface DataType {
-  src: string
+  //src: string
   system?: string
-  browser?: string
+  transactionType?: string
   country?: string
   color: ThemeColor
   percentage: number
-  visits: string | number
+  value: string | number
 }
 
-const browserData: DataType[] = [
+const transactionType: DataType[] = [
   {
-    visits: '8.92k',
+    value: '8.92k',
     color: 'success',
-    browser: 'Chrome',
+    transactionType: 'Mua USDC',
     percentage: 64.91,
-    src: '/images/cards/chrome.png'
+    //src: '/images/cards/chrome.png'
   },
   {
-    visits: '1.29k',
+    value: '1.29k',
     color: 'primary',
-    browser: 'Safari',
+    transactionType: 'Bán USDC',
     percentage: 19.03,
-    src: '/images/cards/safari.png'
+    //src: '/images/cards/safari.png'
   },
   {
-    visits: 328,
+    value: 328,
     color: 'info',
     percentage: 3.26,
-    browser: 'Firefox',
-    src: '/images/cards/firefox.png'
+    transactionType: 'Nạp USDC',
+    //src: '/images/cards/firefox.png'
   },
   {
-    visits: 142,
-    browser: 'Edge',
+    value: 142,
+    transactionType: 'Chuyển USDC',
     color: 'warning',
     percentage: 3.99,
-    src: '/images/cards/edge.png'
+    //src: '/images/cards/edge.png'
   },
   {
-    visits: 85,
+    value: 85,
     color: 'error',
-    browser: 'Opera',
+    transactionType: 'Nạp tiền tiết kiệm',
     percentage: 2.12,
-    src: '/images/cards/opera.png'
+    //src: '/images/cards/opera.png'
   },
   {
-    visits: 36,
+    value: 36,
     color: 'info',
-    browser: 'Brave',
+    transactionType: 'Rút tiền tiết kiệm',
     percentage: 1.06,
-    src: '/images/cards/brave.png'
+    //src: '/images/cards/brave.png'
+  },
+  {
+    value: 36,
+    color: 'info',
+    transactionType: 'Tiền gửi bảo hiểm',
+    percentage: 1.06,
+    //src: '/images/cards/brave.png'
   }
 ]
 const osData: DataType[] = [
   {
     color: 'success',
     percentage: 61.5,
-    visits: '475.26k',
+    value: '475.26k',
     system: 'Windows',
-    src: '/images/cards/windows.png'
+    //src: '/images/cards/windows.png'
   },
   {
     system: 'Mac',
     color: 'primary',
-    visits: '89.12k',
+    value: '89.12k',
     percentage: 15.67,
-    src: '/images/cards/mac.png'
+    //src: '/images/cards/mac.png'
   },
   {
     color: 'info',
-    visits: '38.68k',
+    value: '38.68k',
     system: 'Ubuntu',
     percentage: 5.82,
-    src: '/images/cards/ubuntu.png'
+    //src: '/images/cards/ubuntu.png'
   },
   {
     color: 'warning',
-    visits: '30.27k',
+    value: '30.27k',
     system: 'Linux',
     percentage: 5.03,
-    src: '/images/cards/linux.png'
+    //src: '/images/cards/linux.png'
   },
   {
-    visits: '8.34k',
+    value: '8.34k',
     color: 'error',
     system: 'Chrome',
     percentage: 3.25,
-    src: '/images/cards/chrome.png'
+    //src: '/images/cards/chrome.png'
   },
   {
     color: 'info',
     system: 'Cent',
-    visits: '2.25k',
+    value: '2.25k',
     percentage: 1.76,
-    src: '/images/cards/cent.png'
+    //src: '/images/cards/cent.png'
   }
 ]
 const countryData: DataType[] = [
   {
     country: 'USA',
     color: 'success',
-    visits: '87.24k',
+    value: '87.24k',
     percentage: 38.12,
-    src: '/images/cards/usa.png'
+    //src: '/images/cards/usa.png'
   },
   {
     color: 'primary',
-    visits: '42.69k',
+    value: '42.69k',
     country: 'Brazil',
     percentage: 28.23,
-    src: '/images/cards/brazil.png'
+    //src: '/images/cards/brazil.png'
   },
   {
     color: 'info',
     country: 'India',
-    visits: '12.58k',
+    value: '12.58k',
     percentage: 13.82,
-    src: '/images/cards/india.png'
+    //src: '/images/cards/india.png'
   },
   {
-    visits: '4.13k',
+    value: '4.13k',
     color: 'warning',
     percentage: 12.72,
     country: 'Australia',
-    src: '/images/cards/australia.png'
+    //src: '/images/cards/australia.png'
   },
   {
     color: 'error',
-    visits: '2.21k',
+    value: '2.21k',
     country: 'China',
     percentage: 7.11,
-    src: '/images/cards/china.png'
+    //src: '/images/cards/china.png'
   },
   {
     color: 'info',
-    visits: '1.56k',
+    value: '1.56k',
     country: 'France',
     percentage: 6.59,
-    src: '/images/cards/france.png'
+    //src: '/images/cards/france.png'
   }
 ]
 
 const activeTabData: { [key: string]: DataType[] } = {
   os: osData,
-  browser: browserData,
+  transactionType: transactionType,
   country: countryData
 }
 
@@ -191,7 +198,7 @@ const TabList = styled(MuiTabList)<TabListProps>(({ theme }) => ({
 
 const AnalyticsTabsWithTable = () => {
   // ** State
-  const [value, setValue] = useState<string>('browser')
+  const [value, setValue] = useState<string>('transactionType')
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
     setValue(newValue)
@@ -207,9 +214,9 @@ const AnalyticsTabsWithTable = () => {
             onChange={handleChange}
             aria-label='customized tabs example'
           >
-            <Tab value='browser' label='Browser' />
-            <Tab value='os' label='Operating System' />
-            <Tab value='country' label='Country' />
+            <Tab value='transactionType' label='transactionType' />
+            {/* <Tab value='os' label='Operating System' /> */}
+            {/* <Tab value='country' label='Country' /> */}
           </TabList>
         </CardContent>
         <TabPanel
@@ -232,17 +239,17 @@ const AnalyticsTabsWithTable = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant='body2' sx={{ fontWeight: 500 }}>
-                      {value === 'browser' ? 'Browser' : value === 'os' ? 'System' : 'Country'}
+                      Loại giao dịch
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant='body2' sx={{ fontWeight: 500 }}>
-                      Visits
+                      Số lượng
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography noWrap variant='body2' sx={{ fontWeight: 500 }}>
-                      Data in Percentage
+                      Phần trăm lượng giao dịch
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -264,19 +271,29 @@ const AnalyticsTabsWithTable = () => {
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <img
+                        {/* <img
                           width={24}
                           height={24}
                           src={row.src}
-                          alt={value === 'browser' ? row.browser : value === 'os' ? row.system : row.country}
-                        />
+                          alt={
+                            value === 'transactionType'
+                              ? row.transactionType
+                              : value === 'os'
+                              ? row.system
+                              : row.country
+                          }
+                        /> */}
                         <Typography sx={{ ml: 3, color: 'text.secondary' }}>
-                          {value === 'browser' ? row.browser : value === 'os' ? row.system : row.country}
+                          {value === 'transactionType'
+                            ? row.transactionType
+                            : value === 'os'
+                            ? row.system
+                            : row.country}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>{row.visits}</Typography>
+                      <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>{row.value}</Typography>
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>

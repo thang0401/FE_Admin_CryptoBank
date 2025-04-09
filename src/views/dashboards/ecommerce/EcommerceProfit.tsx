@@ -13,7 +13,7 @@ import ReactApexcharts from 'src/@core/components/react-apexcharts'
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
-const series = [{ data: [11, 7, 11, 20] }, { data: [9, 5, 15, 18] }]
+const series = [{ data: [11, 7, 11, 20,11, 7, 11, 20,11, 7, 11, 20] }, { data: [9, 5, 15, 18,9, 5, 15, 18,9, 5, 15, 18] }]
 
 const EcommerceProfit = () => {
   // ** Hook
@@ -48,7 +48,7 @@ const EcommerceProfit = () => {
       }
     },
     stroke: {
-      width: 2,
+      width: 1,
       colors: [theme.palette.background.paper]
     },
     states: {
@@ -62,7 +62,7 @@ const EcommerceProfit = () => {
     xaxis: {
       axisTicks: { show: false },
       axisBorder: { show: false },
-      categories: ['Jan', 'Apr', 'Jul', 'Oct'],
+      categories: ['Jan', 'Feb', 'Mar', 'Apri', 'May', 'Jun', 'Jul', 'Agu', 'Sep', 'Oct', 'Nov', 'Dec'],
       labels: {
         style: {
           fontSize: '14px',
@@ -113,10 +113,10 @@ const EcommerceProfit = () => {
   return (
     <Card>
       <CardContent sx={{ p: theme => `${theme.spacing(3.5, 5, 0)} !important` }}>
-        <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>Profit</Typography>
+        <Typography sx={{ fontWeight: 600, color: 'text.secondary' }}>Tỷ lệ mua/bán USDC </Typography>
         <Typography variant='h5'>624k</Typography>
       </CardContent>
-      <ReactApexcharts type='bar' height={110} options={options} series={series} />
+      <ReactApexcharts type='bar' width={450} height={250} options={options} series={series} />
     </Card>
   )
 }

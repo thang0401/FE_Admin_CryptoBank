@@ -96,14 +96,14 @@ const AnalyticsProfitReport = () => {
         <Box sx={{ gap: 2, display: 'flex', justifyContent: 'space-between', flexDirection: ['row', 'column'] }}>
           <div>
             <Typography noWrap variant='h6' sx={{ mb: 1 }}>
-              Profit Report
+              Xu hướng giao dịch theo thời gian
             </Typography>
             <CustomChip
               rounded
               skin='light'
               color='warning'
               sx={{ fontWeight: 500 }}
-              label={`Year ${new Date().getFullYear()}`}
+              label={`Month ${new Date().getMonth()}`}
             />
           </div>
           <div>
