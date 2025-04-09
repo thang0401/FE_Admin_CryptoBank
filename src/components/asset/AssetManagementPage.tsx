@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Box, Typography, Tabs, Tab, Paper, useTheme } from "@mui/material"
-import { AccountBalance, History, Security, AdminPanelSettings, Assessment, Settings } from "@mui/icons-material"
+import { AccountBalance, History, AdminPanelSettings } from "@mui/icons-material"
 
 import AssetsOverview from "./AssetsOverview"
 import TransactionsTab from "./TransactionsTab"
@@ -12,7 +12,6 @@ import AdminActivityLog from "./AdminActivityLog"
 import ReportsStatistics from "./ReportsStatistics"
 import SettingsTab from "./SettingsTab"
 import type { AssetData, TransactionData, AlertData } from "src/types/asset-management/type"
-import SecuritySettings from "./SecuritySettings"
 
 // Mock data
 const mockAssets: AssetData[] = [
@@ -52,6 +51,18 @@ const mockAssets: AssetData[] = [
     dailyLimit: 10,
     weeklyLimit: 50,
     monthlyLimit: 100,
+  },
+  {
+    id: 4,
+    name: "LINK",
+    type: "crypto",
+    balance: 1200,
+    address: "0x5432...7890",
+    transactions: 325,
+    status: "active",
+    dailyLimit: 500,
+    weeklyLimit: 2000,
+    monthlyLimit: 5000,
   },
 ]
 
@@ -111,6 +122,17 @@ const mockTransactions: TransactionData[] = [
     status: "failed",
     reference: "VCB-67890",
   },
+  {
+    id: 6,
+    type: "smart_contract_fee",
+    asset: "LINK",
+    assetType: "crypto",
+    amount: 10.5,
+    user: "system",
+    timestamp: "2025-03-29T06:30:00Z",
+    status: "completed",
+    txHash: "0xjkl...012",
+  },
 ]
 
 const mockAlerts: AlertData[] = [
@@ -168,9 +190,6 @@ const AssetManagementPage: React.FC = () => {
       <Typography variant="h4" gutterBottom component="div" sx={{ fontWeight: "bold" }}>
         Asset Management
       </Typography>
-      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-        Admin Dashboard
-      </Typography>
 
       {/* Main content tabs */}
       <Paper sx={{ width: "100%", mt: 3, boxShadow: 3 }}>
@@ -185,10 +204,10 @@ const AssetManagementPage: React.FC = () => {
         >
           <Tab label="Assets Overview" icon={<AccountBalance />} iconPosition="start" />
           <Tab label="Transactions" icon={<History />} iconPosition="start" />
-          <Tab label="Security" icon={<Security />} iconPosition="start" />
+          {/* <Tab label="Security" icon={<Security />} iconPosition="start" /> */}
           <Tab label="Admin Activity" icon={<AdminPanelSettings />} iconPosition="start" />
-          <Tab label="Reports & Statistics" icon={<Assessment />} iconPosition="start" />
-          <Tab label="Settings" icon={<Settings />} iconPosition="start" />
+          {/* <Tab label="Reports & Statistics" icon={<Assessment />} iconPosition="start" />
+          <Tab label="Settings" icon={<Settings />} iconPosition="start" /> */}
         </Tabs>
 
         {/* Assets Tab */}
@@ -206,16 +225,16 @@ const AssetManagementPage: React.FC = () => {
         {tabValue === 1 && <TransactionsTab transactions={transactions} />}
 
         {/* Security Tab */}
-        {tabValue === 2 && <SecuritySettings />}
+        {/* {tabValue === 2 && <SecuritySettings />} */}
 
         {/* Admin Activity Log Tab */}
-        {tabValue === 3 && <AdminActivityLog adminLogs={adminLogs} />}
+        {tabValue === 2 && <AdminActivityLog adminLogs={adminLogs} />}
 
         {/* Reports & Statistics Tab */}
-        {tabValue === 4 && <ReportsStatistics assets={assets} transactions={transactions} />}
+        {tabValue === 3 && <ReportsStatistics assets={assets} transactions={transactions} />}
 
         {/* Settings Tab */}
-        {tabValue === 5 && <SettingsTab />}
+        {tabValue === 4 && <SettingsTab />}
       </Paper>
     </Box>
   )

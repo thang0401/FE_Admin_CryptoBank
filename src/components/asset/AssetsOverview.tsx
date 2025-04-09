@@ -46,6 +46,7 @@ import {
   Warning,
   ContentCopy,
   Settings,
+  Notifications,
 } from "@mui/icons-material"
 import type { AssetData, TransactionData, AlertData } from "src/types/asset-management/type"
 import TwoFactorVerification from "./TwoFactorVerification"
@@ -81,6 +82,7 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
   const [password, setPassword] = useState<string>("")
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState<boolean>(false)
   const [pendingAction, setPendingAction] = useState<"transfer" | "adjust" | null>(null)
+  const [showAlerts, setShowAlerts] = useState<boolean>(false)
 
   const handleAssetTypeTabChange = (_event: React.SyntheticEvent, newValue: number): void => {
     setAssetTypeTab(newValue)
@@ -249,6 +251,8 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
       return `₫${value.toLocaleString("vi-VN")}`
     } else if (currency === "ETH") {
       return `${value.toLocaleString("en-US", { minimumFractionDigits: 6, maximumFractionDigits: 6 })} ETH`
+    } else if (currency === "LINK") {
+      return `${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} LINK`
     }
     return value.toString()
   }
@@ -274,6 +278,7 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
     USDC: theme.palette.mode === "dark" ? "#1e2a3a" : "#e8f5e9",
     VND: theme.palette.mode === "dark" ? "#4a3b52" : "#f5f5f5",
     ETH: theme.palette.mode === "dark" ? "#2d3142" : "#e3f2fd",
+    LINK: theme.palette.mode === "dark" ? "#375280" : "#e8eaf6",
   }
 
   const filteredAssets =
@@ -330,11 +335,24 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
               </CardContent>
             </Card>
           </Grid>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ height: "100%", backgroundColor: cardBackgroundColors.LINK, boxShadow: 3 }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ fontWeight: "medium" }}>
+                  LINK (Smart Contract Gas)
+                </Typography>
+                <Typography variant="h4" sx={{ my: 1, fontWeight: "bold" }}>
+                  {formatCurrency(assets.find((a) => a.name === "LINK")?.balance || 0, "LINK")}
+                </Typography>
+                <Typography variant="body2">Last updated: Today, 9:45 AM</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
 
         {/* Alerts Section */}
-        {alerts.length > 0 && (
-          <Box sx={{ mt: 3 }}>
+        {alerts.length > 0 && showAlerts && (
+          <Box sx={{ mt: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Alerts
             </Typography>
@@ -363,6 +381,24 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
             <Typography variant="h6">Assets Overview</Typography>
             <Box>
+              <Tooltip title={`${alerts.length} alerts`}>
+                <IconButton onClick={() => setShowAlerts(!showAlerts)} sx={{ mr: 1, position: "relative" }}>
+                  <Notifications />
+                  {alerts.length > 0 && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        bgcolor: "error.main",
+                      }}
+                    />
+                  )}
+                </IconButton>
+              </Tooltip>
               <Button variant="outlined" startIcon={<Refresh />} sx={{ mr: 1 }}>
                 Refresh
               </Button>
@@ -420,7 +456,14 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
                         <Wallet
                           sx={{
                             mr: 1,
-                            color: asset.name === "USDC" ? "#2e7d32" : asset.name === "VND" ? "#757575" : "#1976d2",
+                            color:
+                              asset.name === "USDC"
+                                ? "#2e7d32"
+                                : asset.name === "VND"
+                                  ? "#757575"
+                                  : asset.name === "Link"
+                                    ? "#375280"
+                                    : "#1976d2",
                           }}
                         />
                         <Box>
