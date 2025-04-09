@@ -142,7 +142,7 @@ const EmployeeManagement = () => {
                 const mockData: Employee[] = [
                   {
                   id: "1",
-                  avatar: "1",
+                  avatar: "https://randomuser.me/api/portraits/men/32.jpg",
                   name: "Galen Slixby",
                   username: "gslixby0",
                   password: "",
