@@ -2,7 +2,7 @@ import { CryptoIcon } from "./StyledComponents"
 
 export const USDCIcon = () => (
   <CryptoIcon>
-    <img src="https://static.vecteezy.com/system/resources/previews/044/626/814/non_2x/usdc-logo-on-transparent-background-free-vector.jpg" alt="USDC" width={43} height={43} />
+   <img src="/images/logos/usdc-logo-removebg-preview.png" alt="USDC" width={24} height={24} />
   </CryptoIcon>
 )
 
