@@ -14,18 +14,7 @@ const navigation = (): VerticalNavItemsType => {
           path: '/report-and-statistic/transaction-flow'
         },
         {
-          title: 'Báo cáo tài sản và đầu tư',
-          icon: 'bx:envelope',
-          path: '/report-and-statistic'
-        },
-        {
           title: 'Báo cáo rủi ro và bảo mật',
-          icon: 'bx:envelope',
-          path: '/report-and-statistic'
-        }
-        ,
-        {
-          title: 'Báo cáo hiệu suất và vận hành',
           icon: 'bx:envelope',
           path: '/report-and-statistic'
         }
