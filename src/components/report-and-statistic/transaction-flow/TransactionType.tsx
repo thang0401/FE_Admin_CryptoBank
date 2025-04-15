@@ -210,16 +210,6 @@ const TransactionType = () => {
       <CardHeader title='Tổng quan các loại giao dịch' />
       <TabContext value={value}>
         <CardContent sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}>
-          {/* <TabList
-            variant='scrollable'
-            scrollButtons='auto'
-            onChange={handleChange}
-            aria-label='customized tabs example'
-          >
-            <Tab value='transactionType' label='transactionType' />
-            <Tab value='os' label='Operating System' />
-            <Tab value='country' label='Country' />
-          </TabList> */}
         </CardContent>
         <TabPanel
           value={value}
@@ -273,18 +263,7 @@ const TransactionType = () => {
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {/* <img
-                          width={24}
-                          height={24}
-                          src={row.src}
-                          alt={
-                            value === 'transactionType'
-                              ? row.transactionType
-                              : value === 'os'
-                              ? row.system
-                              : row.country
-                          }
-                        /> */}
+
                         <Typography sx={{ ml: 3, color: 'text.secondary' }}>
                           {value === 'transactionType'
                             ? row.transactionType

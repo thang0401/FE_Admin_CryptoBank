@@ -137,7 +137,6 @@ const SuccessfulAndFailRate = () => {
       <CardHeader
         sx={{ pb: 2.5 }}
         title='Tỷ lệ giao dịch thành công và thất bại'
-        subheader='42.82k Total Sales'
         subheaderTypographyProps={{ sx: { color: 'text.disabled' } }}
         action={<OptionsMenu iconButtonProps={{ size: 'small' }} options={['Share', 'Refresh', 'Edit']} />}
       />
