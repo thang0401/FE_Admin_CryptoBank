@@ -16,13 +16,13 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Báo cáo rủi ro và bảo mật',
           icon: 'bx:envelope',
-          path: '/report-and-statistic'
+          path: '/report-and-statistic/risk-and-security'
         }
         ,
         {
           title: 'Báo cáo khách hàng và tiếp thị',
           icon: 'bx:envelope',
-          path: '/report-and-statistic'
+          path: '/report-and-statistic/customer-and-promotion'
         }
       ]
     },
