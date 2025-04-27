@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import axios from "axios"
 import {
   Box,
   Container,
@@ -66,45 +67,15 @@ interface OrdersManagementProps {
   orderType?: "buy" | "sell"
 }
 
-// Mock data for orders
-const generateMockOrders = (orderType?: "buy" | "sell"): Order[] => {
-  const statuses: Array<"pending" | "approved" | "rejected"> = ["pending", "approved", "rejected"]
-  const types: Array<"buy" | "sell"> = orderType ? [orderType] : ["buy", "sell"]
-  const users = [
-    { id: 1, name: "Nguyen Van A", email: "nguyenvana@example.com" },
-    { id: 2, name: "Tran Thi B", email: "tranthib@example.com" },
-    { id: 3, name: "Le Van C", email: "levanc@example.com" },
-    { id: 4, name: "Pham Thi D", email: "phamthid@example.com" },
-    { id: 5, name: "Hoang Van E", email: "hoangvane@example.com" },
-  ]
-
-  return Array.from({ length: 50 }, (_, i) => {
-    const type = orderType || types[Math.floor(Math.random() * types.length)]
-    const amount = type === "buy" ? (Math.random() * 1000 + 100).toFixed(2) : (Math.random() * 50 + 5).toFixed(2)
-    const rate = 26003.73
-    const total =
-      type === "buy" ? (Number.parseFloat(amount) * rate).toFixed(2) : (Number.parseFloat(amount) / rate).toFixed(2)
-
-    const user = users[Math.floor(Math.random() * users.length)]
-    const createdDate = new Date()
-    createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 30))
-
-    return {
-      id: i + 1,
-      type,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      amount: type === "buy" ? `${amount} USDC` : `${amount} USDC`,
-      total: type === "buy" ? `${Number(total).toLocaleString()} VND` : `${Number(total).toLocaleString()} VND`,
-      user: user.name,
-      userId: user.id,
-      email: user.email,
-      createdAt: createdDate.toISOString(),
-      updatedAt: createdDate.toISOString(),
-      paymentMethod: "Bank Transfer",
-      bankAccount: type === "buy" ? "1234567890" : null,
-      walletAddress: type === "sell" ? "0x1234...5678" : null,
-    }
-  })
+interface APITransaction {
+  transactionId: string
+  userId: string
+  debitWalletId: string
+  vndAmount: number
+  usdcAmount: number
+  exchangeRate: number
+  transactionType: "DEPOSIT" | "WITHDRAW"
+  status: string
 }
 
 const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) => {
@@ -131,19 +102,67 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
     totalSellVolume: "0",
   })
 
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockOrders = generateMockOrders(orderType)
-      setOrders(mockOrders)
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const response = await axios.get<APITransaction[]>(
+        "https://be-crypto-depot.name.vn/api/payment/transactions/all"
+      )
+      
+      console.log("API Response:", response.data)
+
+      const mappedOrders: Order[] = response.data
+        .filter((transaction) => 
+          !orderType || 
+          (orderType === "buy" && transaction.transactionType === "DEPOSIT") ||
+          (orderType === "sell" && transaction.transactionType === "WITHDRAW")
+        )
+        .map((transaction) => {
+          const type = transaction.transactionType === "DEPOSIT" ? "buy" : "sell"
+          let status: "pending" | "approved" | "rejected"
+          
+          // For buy orders, only "approved" or "rejected" (mapped from "success" or "failed")
+          if (type === "buy") {
+            status = transaction.status.toLowerCase() === "success" || transaction.status.toLowerCase() === "sucesss" 
+              ? "approved" 
+              : "rejected"
+          } else {
+            // For sell orders, keep the existing logic
+            status = transaction.status.toLowerCase() === "success" || transaction.status.toLowerCase() === "sucesss" 
+              ? "approved" 
+              : transaction.status.toLowerCase() === "failed" 
+              ? "rejected" 
+              : "pending"
+          }
+
+          return {
+            id: transaction.transactionId,
+            type,
+            status,
+            amount: `${transaction.usdcAmount.toFixed(2)} USDC`,
+            total: `${transaction.vndAmount.toLocaleString()} VND`,
+            user: `User ${transaction.userId.slice(0, 8)}`,
+            userId: transaction.userId,
+            email: `user${transaction.userId.slice(0, 8)}@example.com`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paymentMethod: type === "buy" ? "Bank Transfer" : "Crypto Wallet",
+            bankAccount: type === "buy" ? "N/A" : null,
+            walletAddress: type === "sell" ? transaction.debitWalletId : null,
+          }
+        })
+
+      console.log("Mapped Orders:", mappedOrders)
+
+      setOrders(mappedOrders)
 
       // Calculate stats
-      const pendingOrders = mockOrders.filter((order) => order.status === "pending").length
-      const approvedOrders = mockOrders.filter((order) => order.status === "approved").length
-      const rejectedOrders = mockOrders.filter((order) => order.status === "rejected").length
+      const pendingOrders = mappedOrders.filter((order) => order.status === "pending").length
+      const approvedOrders = mappedOrders.filter((order) => order.status === "approved").length
+      const rejectedOrders = mappedOrders.filter((order) => order.status === "rejected").length
 
-      const buyOrders = mockOrders.filter((order) => order.type === "buy")
-      const sellOrders = mockOrders.filter((order) => order.type === "sell")
+      const buyOrders = mappedOrders.filter((order) => order.type === "buy")
+      const sellOrders = mappedOrders.filter((order) => order.type === "sell")
 
       const totalBuyVolume = buyOrders.reduce((sum, order) => {
         return sum + Number.parseFloat(order.amount.split(" ")[0])
@@ -154,16 +173,22 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
       }, 0)
 
       setStats({
-        totalOrders: mockOrders.length,
+        totalOrders: mappedOrders.length,
         pendingOrders,
         approvedOrders,
         rejectedOrders,
         totalBuyVolume: totalBuyVolume.toFixed(2),
         totalSellVolume: totalSellVolume.toFixed(2),
       })
-
+    } catch (error) {
+      console.error("Error fetching orders:", error)
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
+  }
+
+  useEffect(() => {
+    fetchOrders()
   }, [orderType])
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
@@ -184,7 +209,7 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
     setOpenDialog(false)
   }
 
-  const handleApproveOrder = (orderId: number) => {
+  const handleApproveOrder = (orderId: string) => {
     setOrders(orders.map((order) => (order.id === orderId ? { ...order, status: "approved" } : order)))
     setOpenDialog(false)
 
@@ -195,7 +220,7 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
     })
   }
 
-  const handleRejectOrder = (orderId: number) => {
+  const handleRejectOrder = (orderId: string) => {
     setOrders(orders.map((order) => (order.id === orderId ? { ...order, status: "rejected" } : order)))
     setOpenDialog(false)
 
@@ -207,12 +232,7 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
   }
 
   const handleRefresh = () => {
-    setLoading(true)
-    setTimeout(() => {
-      const mockOrders = generateMockOrders(orderType)
-      setOrders(mockOrders)
-      setLoading(false)
-    }, 1000)
+    fetchOrders()
   }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -244,9 +264,9 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
     setPage(0)
   }
 
-  // Filter orders based on current filters
+  // Restore full filtering with adjusted logic for buy orders
   const filteredOrders = orders.filter((order) => {
-    // Exclude pending orders for buy-orders
+    // For buy orders, only allow approved or rejected (no pending)
     if (orderType === "buy" && order.status === "pending") {
       return false
     }
@@ -294,6 +314,8 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
 
     return true
   })
+
+  console.log("Filtered Orders:", filteredOrders)
 
   return (
     <>

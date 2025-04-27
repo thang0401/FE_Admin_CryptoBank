@@ -28,8 +28,8 @@ interface OrderDetailDialogProps {
   open: boolean
   selectedOrder: Order | null
   onClose: () => void
-  onApprove: (orderId: number) => void
-  onReject: (orderId: number) => void
+  onApprove: (orderId: string) => void
+  onReject: (orderId: string) => void
 }
 const formatDate = (dateString: string): string => {
     const options: Intl.DateTimeFormatOptions = {
