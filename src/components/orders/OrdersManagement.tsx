@@ -2,22 +2,74 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useTheme } from "@mui/material"
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Chip,
+  Button,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Tabs,
+  Tab,
+  Divider,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  useTheme,
+} from "@mui/material"
+import { styled } from "@mui/material/styles"
+import Head from "next/head"
+import CheckCircleIcon from "@mui/icons-material/CheckCircle"
+import CancelIcon from "@mui/icons-material/Cancel"
+import VisibilityIcon from "@mui/icons-material/Visibility"
+import RefreshIcon from "@mui/icons-material/Refresh"
+import SearchIcon from "@mui/icons-material/Search"
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"
+import PendingActionsIcon from "@mui/icons-material/PendingActions"
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz"
+import FilterListIcon from "@mui/icons-material/FilterList"
 import StatsCards from "./StatsCards"
 import FilterControls from "./FilterControls"
 import OrdersTable from "./OrdersTable"
 import OrderDetailDialog from "./OrderDetailDialog"
-import type { Order, Stats } from "src/types/orders-management/order"
+import { Order, Stats } from "src/types/orders-management/order"
 import { StyledCard } from "./StyledComponents"
 
-interface OrdersManagementPageProps {
+const CryptoIcon = styled("div")(({ theme }) => ({
+  width: "24px",
+  height: "24px",
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginRight: "8px",
+}))
+
+interface OrdersManagementProps {
   orderType?: "buy" | "sell"
 }
 
 // Mock data for orders
-const generateMockOrders = (): Order[] => {
+const generateMockOrders = (orderType?: "buy" | "sell"): Order[] => {
   const statuses: Array<"pending" | "approved" | "rejected"> = ["pending", "approved", "rejected"]
-  const types: Array<"buy" | "sell"> = ["buy", "sell"]
+  const types: Array<"buy" | "sell"> = orderType ? [orderType] : ["buy", "sell"]
   const users = [
     { id: 1, name: "Nguyen Van A", email: "nguyenvana@example.com" },
     { id: 2, name: "Tran Thi B", email: "tranthib@example.com" },
@@ -27,7 +79,7 @@ const generateMockOrders = (): Order[] => {
   ]
 
   return Array.from({ length: 50 }, (_, i) => {
-    const type = types[Math.floor(Math.random() * types.length)]
+    const type = orderType || types[Math.floor(Math.random() * types.length)]
     const amount = type === "buy" ? (Math.random() * 1000 + 100).toFixed(2) : (Math.random() * 50 + 5).toFixed(2)
     const rate = 26003.73
     const total =
@@ -55,7 +107,7 @@ const generateMockOrders = (): Order[] => {
   })
 }
 
-const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }) => {
+const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) => {
   const theme = useTheme()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -63,10 +115,9 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [openDialog, setOpenDialog] = useState<boolean>(false)
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "rejected">("pending")
-  const [filterType, setFilterType] = useState<"all" | "buy" | "sell">("all")
+  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "rejected">("all")
   const [searchTerm, setSearchTerm] = useState<string>("")
-  const [tabValue, setTabValue] = useState<number>(0)
+  const [tabValue, setTabValue] = useState<number>(orderType === "buy" ? 1 : 0)
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
@@ -83,20 +134,16 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
   useEffect(() => {
     // Simulate API call
     setTimeout(() => {
-      const mockOrders = generateMockOrders()
-
-      // Lọc đơn hàng theo orderType nếu được chỉ định
-      const filteredOrders = orderType ? mockOrders.filter((order) => order.type === orderType) : mockOrders
-
-      setOrders(filteredOrders)
+      const mockOrders = generateMockOrders(orderType)
+      setOrders(mockOrders)
 
       // Calculate stats
-      const pendingOrders = filteredOrders.filter((order) => order.status === "pending").length
-      const approvedOrders = filteredOrders.filter((order) => order.status === "approved").length
-      const rejectedOrders = filteredOrders.filter((order) => order.status === "rejected").length
+      const pendingOrders = mockOrders.filter((order) => order.status === "pending").length
+      const approvedOrders = mockOrders.filter((order) => order.status === "approved").length
+      const rejectedOrders = mockOrders.filter((order) => order.status === "rejected").length
 
-      const buyOrders = filteredOrders.filter((order) => order.type === "buy")
-      const sellOrders = filteredOrders.filter((order) => order.type === "sell")
+      const buyOrders = mockOrders.filter((order) => order.type === "buy")
+      const sellOrders = mockOrders.filter((order) => order.type === "sell")
 
       const totalBuyVolume = buyOrders.reduce((sum, order) => {
         return sum + Number.parseFloat(order.amount.split(" ")[0])
@@ -107,7 +154,7 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
       }, 0)
 
       setStats({
-        totalOrders: filteredOrders.length,
+        totalOrders: mockOrders.length,
         pendingOrders,
         approvedOrders,
         rejectedOrders,
@@ -162,12 +209,8 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
   const handleRefresh = () => {
     setLoading(true)
     setTimeout(() => {
-      const mockOrders = generateMockOrders()
-
-      // Lọc đơn hàng theo orderType nếu được chỉ định
-      const filteredOrders = orderType ? mockOrders.filter((order) => order.type === orderType) : mockOrders
-
-      setOrders(filteredOrders)
+      const mockOrders = generateMockOrders(orderType)
+      setOrders(mockOrders)
       setLoading(false)
     }, 1000)
   }
@@ -176,12 +219,11 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
     setTabValue(newValue)
     setPage(0)
 
-    // Điều chỉnh filterStatus dựa trên tab
     switch (newValue) {
       case 0: // Pending
         setFilterStatus("pending")
         break
-      case 1: // History - chỉ hiển thị approved và rejected
+      case 1: // History
         setFilterStatus("all")
         break
     }
@@ -189,11 +231,6 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
 
   const handleStatusFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setFilterStatus(event.target.value as "all" | "pending" | "approved" | "rejected")
-    setPage(0)
-  }
-
-  const handleTypeFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setFilterType(event.target.value as "all" | "buy" | "sell")
     setPage(0)
   }
 
@@ -209,30 +246,28 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
 
   // Filter orders based on current filters
   const filteredOrders = orders.filter((order) => {
-    // Lọc theo tab
-    if (tabValue === 0) {
-      // Tab Pending Orders: chỉ hiển thị đơn hàng pending
-      if (order.status !== "pending") {
-        return false
-      }
-    } else if (tabValue === 1) {
-      // Tab History Orders: chỉ hiển thị đơn hàng approved hoặc rejected
-      if (order.status === "pending") {
-        return false
-      }
-    }
-
-    // Lọc theo trạng thái (chỉ áp dụng trong tab History)
-    if (tabValue === 1 && filterStatus !== "all" && order.status !== filterStatus) {
+    // Exclude pending orders for buy-orders
+    if (orderType === "buy" && order.status === "pending") {
       return false
     }
 
-    // Lọc theo loại (chỉ áp dụng khi không có orderType được chỉ định)
-    if (!orderType && filterType !== "all" && order.type !== filterType) {
+    // Filter by status for Pending tab (only applies to sell-orders)
+    if (orderType !== "buy" && tabValue === 0 && order.status !== "pending") {
       return false
     }
 
-    // Lọc theo khoảng thời gian
+    // Filter by status for History tab (or buy-orders which is always history)
+    if ((orderType !== "buy" && tabValue === 1) || orderType === "buy") {
+      // Exclude pending orders in History tab for sell-orders
+      if (orderType !== "buy" && tabValue === 1 && order.status === "pending") {
+        return false
+      }
+      if (filterStatus !== "all" && order.status !== filterStatus) {
+        return false
+      }
+    }
+
+    // Filter by date range
     if (startDate || endDate) {
       const orderDate = new Date(order.createdAt)
       if (startDate && orderDate < startDate) {
@@ -247,7 +282,7 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
       }
     }
 
-    // Lọc theo từ khóa tìm kiếm
+    // Search term
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase()
       return (
@@ -262,43 +297,55 @@ const OrdersManagementPage: React.FC<OrdersManagementPageProps> = ({ orderType }
 
   return (
     <>
-      {/* Stats Cards */}
-      <StatsCards stats={stats} orderType={orderType} />
+      <Head>
+        <title>Admin - Order Management</title>
+      </Head>
 
-      <StyledCard>
-        {/* Tabs and Search */}
-        <FilterControls
-          tabValue={tabValue}
-          searchTerm={searchTerm}
-          filterStatus={filterStatus}
-          filterType={filterType}
-          startDate={startDate}
-          endDate={endDate}
-          showHistoryFilters={tabValue === 1} // Chỉ hiển thị filters trong tab History
-          handleTabChange={handleTabChange}
-          handleSearchChange={(e) => setSearchTerm(e.target.value)}
-          handleStatusFilterChange={handleStatusFilterChange}
-          handleTypeFilterChange={handleTypeFilterChange}
-          handleStartDateChange={handleStartDateChange}
-          handleEndDateChange={handleEndDateChange}
-          handleRefresh={handleRefresh}
-          // Ẩn bộ lọc loại đơn hàng nếu đã chỉ định orderType
-          hideTypeFilter={!!orderType}
-        />
+      <Box sx={{ minHeight: "100vh", py: 4 }}>
+        <Container maxWidth="xl">
+          <Box mb={4}>
+            <Typography variant="h4" fontWeight="bold" gutterBottom>
+              {orderType === "buy" ? "Buy Orders" : orderType === "sell" ? "Sell Orders" : "Order Management"}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Manage and process customer {orderType ? `${orderType} orders` : "buy/sell orders"}
+            </Typography>
+          </Box>
 
-        {/* Orders Table */}
-        <OrdersTable
-          loading={loading}
-          filteredOrders={filteredOrders}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          handleChangePage={handleChangePage}
-          handleChangeRowsPerPage={handleChangeRowsPerPage}
-          handleViewOrder={handleViewOrder}
-          
-        
-        />
-      </StyledCard>
+          {/* Stats Cards */}
+          <StatsCards stats={stats} />
+
+          <StyledCard>
+            {/* Tabs and Search */}
+            <FilterControls
+              tabValue={tabValue}
+              searchTerm={searchTerm}
+              filterStatus={filterStatus}
+              startDate={startDate}
+              endDate={endDate}
+              showHistoryFilters={true}
+              handleTabChange={handleTabChange}
+              handleSearchChange={(e) => setSearchTerm(e.target.value)}
+              handleStatusFilterChange={handleStatusFilterChange}
+              handleStartDateChange={handleStartDateChange}
+              handleEndDateChange={handleEndDateChange}
+              handleRefresh={handleRefresh}
+              orderType={orderType}
+            />
+
+            {/* Orders Table */}
+            <OrdersTable
+              loading={loading}
+              filteredOrders={filteredOrders}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              handleChangePage={handleChangePage}
+              handleChangeRowsPerPage={handleChangeRowsPerPage}
+              handleViewOrder={handleViewOrder}
+            />
+          </StyledCard>
+        </Container>
+      </Box>
 
       {/* Order Detail Dialog */}
       <OrderDetailDialog
