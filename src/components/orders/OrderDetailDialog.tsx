@@ -1,6 +1,8 @@
 "use client"
 
 import type React from "react"
+import { useState } from "react"
+import axios from "axios"
 import {
   Dialog,
   DialogTitle,
@@ -12,10 +14,8 @@ import {
   Divider,
   Chip,
   Button,
+  CircularProgress,
 } from "@mui/material"
-
-
-
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import CancelIcon from "@mui/icons-material/Cancel"
@@ -31,18 +31,73 @@ interface OrderDetailDialogProps {
   onApprove: (orderId: string) => void
   onReject: (orderId: string) => void
 }
+
 const formatDate = (dateString: string): string => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
-    return new Date(dateString).toLocaleDateString("en-US", options)
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }
+  return new Date(dateString).toLocaleDateString("en-US", options)
+}
+
 const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrder, onClose, onApprove, onReject }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+
   if (!selectedOrder) return null
+
+  const handleApprove = async () => {
+    if (!selectedOrder) return
+    
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      const response = await axios.put("https://be-crypto-depot.name.vn/api/payment/transactions/confirm", {
+        transactionId: selectedOrder.id,
+        userId: selectedOrder.userId,
+        newStatus: "d06uupiq0v87k5fikb00"  // Status code for Approve
+      })
+      
+      console.log("Approval response:", response.data)
+      
+      // Call the parent component's callback function
+      onApprove(selectedOrder.id)
+    } catch (err) {
+      console.error("Error approving transaction:", err)
+      setError("Failed to approve the transaction. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleReject = async () => {
+    if (!selectedOrder) return
+    
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      const response = await axios.put("https://be-crypto-depot.name.vn/api/payment/transactions/confirm", {
+        transactionId: selectedOrder.id,
+        userId: selectedOrder.userId,
+        newStatus: "cvvvevrme6nnaun2s4cg"  // Status code for Reject
+      })
+      
+      console.log("Rejection response:", response.data)
+      
+      // Call the parent component's callback function
+      onReject(selectedOrder.id)
+    } catch (err) {
+      console.error("Error rejecting transaction:", err)
+      setError("Failed to reject the transaction. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -146,26 +201,36 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrd
               <Typography variant="body1">{selectedOrder.walletAddress}</Typography>
             </Grid>
           )}
+          
+          {error && (
+            <Grid item xs={12}>
+              <Typography color="error" variant="body2">
+                {error}
+              </Typography>
+            </Grid>
+          )}
         </Grid>
       </DialogContent>
       <DialogActions sx={{ p: 2, justifyContent: "space-between" }}>
         {selectedOrder.status === "pending" ? (
           <>
             <StyledButton
-              onClick={() => onReject(selectedOrder.id)}
+              onClick={handleReject}
               color="error"
               variant="outlined"
-              startIcon={<CancelIcon />}
+              startIcon={isLoading ? <CircularProgress size={20} /> : <CancelIcon />}
+              disabled={isLoading}
             >
-              Reject Order
+              {isLoading ? "Processing..." : "Reject Order"}
             </StyledButton>
             <StyledButton
-              onClick={() => onApprove(selectedOrder.id)}
+              onClick={handleApprove}
               color="success"
               variant="contained"
-              startIcon={<CheckCircleIcon />}
+              startIcon={isLoading ? <CircularProgress size={20} /> : <CheckCircleIcon />}
+              disabled={isLoading}
             >
-              Approve Order
+              {isLoading ? "Processing..." : "Approve Order"}
             </StyledButton>
           </>
         ) : (
@@ -179,4 +244,3 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrd
 }
 
 export default OrderDetailDialog
-
