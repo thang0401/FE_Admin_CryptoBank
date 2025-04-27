@@ -11,24 +11,27 @@ interface StatusChipProps {
 const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
   let color: "warning" | "success" | "error"
   let icon
+  let label: string
 
   switch (status) {
     case "approved":
       color = "success"
       icon = <CheckCircleIcon fontSize="small" />
+      label = "Success"
       break
     case "rejected":
       color = "error"
       icon = <CancelIcon fontSize="small" />
+      label = "Failed"
       break
     case "pending":
     default:
       color = "warning"
       icon = <PendingActionsIcon fontSize="small" />
+      label = "Pending"
   }
 
-  return <StyledChip label={status.charAt(0).toUpperCase() + status.slice(1)} color={color} size="small" icon={icon} />
+  return <StyledChip label={label} color={color} size="small" icon={icon} />
 }
 
 export default StatusChip
-
