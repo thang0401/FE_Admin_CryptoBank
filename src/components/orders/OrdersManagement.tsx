@@ -81,6 +81,7 @@ interface APITransaction {
 const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) => {
   const theme = useTheme()
   const [orders, setOrders] = useState<Order[]>([])
+  const [pendingOrders, setPendingOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [page, setPage] = useState<number>(0)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -92,7 +93,6 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
-  // Stats
   const [stats, setStats] = useState<Stats>({
     totalOrders: 0,
     pendingOrders: 0,
@@ -101,6 +101,62 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
     totalBuyVolume: "0",
     totalSellVolume: "0",
   })
+
+  const mapTransactionsToOrders = (transactions: APITransaction[]): Order[] => {
+    return transactions
+      .filter((transaction) => 
+        !orderType || 
+        (orderType === "buy" && transaction.transactionType === "DEPOSIT") ||
+        (orderType === "sell" && transaction.transactionType === "WITHDRAW")
+      )
+      .map((transaction) => {
+        const type = transaction.transactionType === "DEPOSIT" ? "buy" : "sell"
+        let status: "pending" | "approved" | "rejected"
+        
+        if (type === "buy") {
+          status = transaction.status.toLowerCase() === "success" || transaction.status.toLowerCase() === "sucesss" || transaction.status.toLowerCase() === "approved"
+            ? "approved" 
+            : "rejected"
+        } else {
+          status = transaction.status.toLowerCase() === "success" || transaction.status.toLowerCase() === "sucesss" || transaction.status.toLowerCase() === "approved"
+            ? "approved" 
+            : transaction.status.toLowerCase() === "failed" 
+            ? "rejected" 
+            : "pending"
+        }
+
+        return {
+          id: transaction.transactionId,
+          type,
+          status,
+          amount: `${transaction.usdcAmount.toFixed(2)} USDC`,
+          total: `${transaction.vndAmount.toLocaleString()} VND`,
+          user: `User ${transaction.userId.slice(0, 8)}`,
+          userId: transaction.userId,
+          email: `user${transaction.userId.slice(0, 8)}@example.com`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          paymentMethod: type === "buy" ? "Bank Transfer" : "Crypto Wallet",
+          bankAccount: type === "buy" ? "N/A" : null,
+          walletAddress: type === "sell" ? transaction.debitWalletId : null,
+        }
+      })
+  }
+
+  const fetchPendingOrders = async () => {
+    try {
+      const response = await axios.get<APITransaction[]>(
+        "https://be-crypto-depot.name.vn/api/payment/transactions/pending"
+      )
+      
+      console.log("Pending API Response:", response.data)
+
+      const mappedPendingOrders = mapTransactionsToOrders(response.data)
+      setPendingOrders(mappedPendingOrders)
+    } catch (error) {
+      console.error("Error fetching pending orders:", error)
+    }
+  }
 
   const fetchOrders = async () => {
     try {
@@ -111,53 +167,14 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
       
       console.log("API Response:", response.data)
 
-      const mappedOrders: Order[] = response.data
-        .filter((transaction) => 
-          !orderType || 
-          (orderType === "buy" && transaction.transactionType === "DEPOSIT") ||
-          (orderType === "sell" && transaction.transactionType === "WITHDRAW")
-        )
-        .map((transaction) => {
-          const type = transaction.transactionType === "DEPOSIT" ? "buy" : "sell"
-          let status: "pending" | "approved" | "rejected"
-          
-          // For buy orders, only "approved" or "rejected" (mapped from "success" or "failed")
-          if (type === "buy") {
-            status = transaction.status.toLowerCase() === "success" || transaction.status.toLowerCase() === "sucesss" 
-              ? "approved" 
-              : "rejected"
-          } else {
-            // For sell orders, keep the existing logic
-            status = transaction.status.toLowerCase() === "success" || transaction.status.toLowerCase() === "sucesss" 
-              ? "approved" 
-              : transaction.status.toLowerCase() === "failed" 
-              ? "rejected" 
-              : "pending"
-          }
+      const mappedOrders = mapTransactionsToOrders(response.data)
+        .filter(order => order.status !== "pending")
 
-          return {
-            id: transaction.transactionId,
-            type,
-            status,
-            amount: `${transaction.usdcAmount.toFixed(2)} USDC`,
-            total: `${transaction.vndAmount.toLocaleString()} VND`,
-            user: `User ${transaction.userId.slice(0, 8)}`,
-            userId: transaction.userId,
-            email: `user${transaction.userId.slice(0, 8)}@example.com`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            paymentMethod: type === "buy" ? "Bank Transfer" : "Crypto Wallet",
-            bankAccount: type === "buy" ? "N/A" : null,
-            walletAddress: type === "sell" ? transaction.debitWalletId : null,
-          }
-        })
-
-      console.log("Mapped Orders:", mappedOrders)
+      console.log("Mapped Orders (non-pending):", mappedOrders)
 
       setOrders(mappedOrders)
 
-      // Calculate stats
-      const pendingOrders = mappedOrders.filter((order) => order.status === "pending").length
+      const pendingOrdersCount = pendingOrders.length
       const approvedOrders = mappedOrders.filter((order) => order.status === "approved").length
       const rejectedOrders = mappedOrders.filter((order) => order.status === "rejected").length
 
@@ -173,8 +190,8 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
       }, 0)
 
       setStats({
-        totalOrders: mappedOrders.length,
-        pendingOrders,
+        totalOrders: mappedOrders.length + pendingOrdersCount,
+        pendingOrders: pendingOrdersCount,
         approvedOrders,
         rejectedOrders,
         totalBuyVolume: totalBuyVolume.toFixed(2),
@@ -188,8 +205,35 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
   }
 
   useEffect(() => {
+    fetchPendingOrders()
     fetchOrders()
   }, [orderType])
+
+  useEffect(() => {
+    const pendingOrdersCount = pendingOrders.length
+    const approvedOrders = orders.filter((order) => order.status === "approved").length
+    const rejectedOrders = orders.filter((order) => order.status === "rejected").length
+
+    const buyOrders = orders.filter((order) => order.type === "buy")
+    const sellOrders = orders.filter((order) => order.type === "sell")
+
+    const totalBuyVolume = buyOrders.reduce((sum, order) => {
+      return sum + Number.parseFloat(order.amount.split(" ")[0])
+    }, 0)
+
+    const totalSellVolume = sellOrders.reduce((sum, order) => {
+      return sum + Number.parseFloat(order.amount.split(" ")[0])
+    }, 0)
+
+    setStats({
+      totalOrders: orders.length + pendingOrdersCount,
+      pendingOrders: pendingOrdersCount,
+      approvedOrders,
+      rejectedOrders,
+      totalBuyVolume: totalBuyVolume.toFixed(2),
+      totalSellVolume: totalSellVolume.toFixed(2),
+    })
+  }, [pendingOrders])
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage)
@@ -210,28 +254,45 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
   }
 
   const handleApproveOrder = (orderId: string) => {
-    setOrders(orders.map((order) => (order.id === orderId ? { ...order, status: "approved" } : order)))
+    const updatedPendingOrders = pendingOrders.filter((order) => order.id !== orderId)
+    const updatedOrder = [...pendingOrders, ...orders].find((order) => order.id === orderId)
+    
+    if (updatedOrder) {
+      updatedOrder.status = "approved"
+      setOrders([...orders, updatedOrder])
+    }
+
+    setPendingOrders(updatedPendingOrders)
     setOpenDialog(false)
 
     setStats({
       ...stats,
-      pendingOrders: stats.pendingOrders - 1,
+      pendingOrders: updatedPendingOrders.length,
       approvedOrders: stats.approvedOrders + 1,
     })
   }
 
   const handleRejectOrder = (orderId: string) => {
-    setOrders(orders.map((order) => (order.id === orderId ? { ...order, status: "rejected" } : order)))
+    const updatedPendingOrders = pendingOrders.filter((order) => order.id !== orderId)
+    const updatedOrder = [...pendingOrders, ...orders].find((order) => order.id === orderId)
+    
+    if (updatedOrder) {
+      updatedOrder.status = "rejected"
+      setOrders([...orders, updatedOrder])
+    }
+
+    setPendingOrders(updatedPendingOrders)
     setOpenDialog(false)
 
     setStats({
       ...stats,
-      pendingOrders: stats.pendingOrders - 1,
+      pendingOrders: updatedPendingOrders.length,
       rejectedOrders: stats.rejectedOrders + 1,
     })
   }
 
   const handleRefresh = () => {
+    fetchPendingOrders()
     fetchOrders()
   }
 
@@ -264,30 +325,17 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
     setPage(0)
   }
 
-  // Restore full filtering with adjusted logic for buy orders
-  const filteredOrders = orders.filter((order) => {
-    // For buy orders, only allow approved or rejected (no pending)
+  const filteredOrders = (orderType !== "buy" && tabValue === 0 ? pendingOrders : orders).filter((order) => {
     if (orderType === "buy" && order.status === "pending") {
       return false
     }
 
-    // Filter by status for Pending tab (only applies to sell-orders)
-    if (orderType !== "buy" && tabValue === 0 && order.status !== "pending") {
-      return false
-    }
-
-    // Filter by status for History tab (or buy-orders which is always history)
     if ((orderType !== "buy" && tabValue === 1) || orderType === "buy") {
-      // Exclude pending orders in History tab for sell-orders
-      if (orderType !== "buy" && tabValue === 1 && order.status === "pending") {
-        return false
-      }
       if (filterStatus !== "all" && order.status !== filterStatus) {
         return false
       }
     }
 
-    // Filter by date range
     if (startDate || endDate) {
       const orderDate = new Date(order.createdAt)
       if (startDate && orderDate < startDate) {
@@ -302,7 +350,6 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
       }
     }
 
-    // Search term
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase()
       return (
@@ -334,11 +381,9 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
             </Typography>
           </Box>
 
-          {/* Stats Cards */}
           <StatsCards stats={stats} />
 
           <StyledCard>
-            {/* Tabs and Search */}
             <FilterControls
               tabValue={tabValue}
               searchTerm={searchTerm}
@@ -355,7 +400,6 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
               orderType={orderType}
             />
 
-            {/* Orders Table */}
             <OrdersTable
               loading={loading}
               filteredOrders={filteredOrders}
@@ -369,7 +413,6 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
         </Container>
       </Box>
 
-      {/* Order Detail Dialog */}
       <OrderDetailDialog
         open={openDialog}
         selectedOrder={selectedOrder}
