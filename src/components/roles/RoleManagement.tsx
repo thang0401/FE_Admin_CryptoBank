@@ -46,15 +46,15 @@ const RoleManagement = () => {
   // Fetch roles từ API
   const fetchRoles = async () => {
     try {
-      const roleResponse = await axios.get('http://14.225.206.68:8000/api/role', {
+      const roleResponse = await axios.get('https://be-crypto-depot.name.vn/api/role', {
         params: { page: page + 1, size: rowsPerPage },
       });
-      const roleUrlResponse = await axios.get('http://14.225.206.68:8000/api/role/url', {
+      const roleUrlResponse = await axios.get('https://be-crypto-depot.name.vn/api/role/url', {
         params: { page: 1, size: 100 },
       });
 
-      const rolesData = roleResponse.data.object.content || [];
-      const roleUrlsData = roleUrlResponse.data.object.content || [];
+      const rolesData = roleResponse.data.content || [];
+      const roleUrlsData = roleUrlResponse.data || [];
 
       const mappedRoles = rolesData.map((role: any) => {
         const config = ROLE_CONFIGS.find((r) => r.name === role.name) || ROLE_CONFIGS[0];
@@ -72,7 +72,7 @@ const RoleManagement = () => {
       });
 
       setRoles(mappedRoles);
-      setTotalElements(roleResponse.data.object.page.totalElements || 0);
+      setTotalElements(roleResponse.data.page.totalElements || 0);
     } catch (error) {
       console.error('Error fetching roles:', error);
       setRoles([]);
@@ -111,12 +111,12 @@ const RoleManagement = () => {
     try {
       const roleConfig = ROLE_CONFIGS.find((config) => config.name === newRole.roleType);
       const payload = { name: newRole.name || 'Untitled Role', note: null };
-      const response = await axios.post('http://14.225.206.68:8000/api/role', payload);
-      const newRoleId = response.data.object.id;
+      const response = await axios.post('https://be-crypto-depot.name.vn/api/role', payload);
+      const newRoleId = response.data.id;
 
       await Promise.all(
         selectedPermissions.map((perm) =>
-          axios.post('http://14.225.206.68:8000/api/role/url', {
+          axios.post('https://be-crypto-depot.name.vn/api/role/url', {
             roleName: newRole.name,
             functionUrl: perm,
           })
@@ -142,12 +142,12 @@ const RoleManagement = () => {
     if (!editingRole) return;
     try {
       const payload = { name: newRole.name };
-      await axios.put(`http://14.225.206.68:8000/api/role/${editingRole.id}`, payload);
+      await axios.put(`https://be-crypto-depot.name.vn/api/role/${editingRole.id}`, payload);
 
-      await axios.delete(`http://14.225.206.68:8000/api/role/url/${editingRole.id}`);
+      // await axios.delete(`https://be-crypto-depot.name.vn/api/role/url/${editingRole.id}`);
       await Promise.all(
         selectedPermissions.map((perm) =>
-          axios.post('http://14.225.206.68:8000/api/role/url', {
+          axios.post('https://be-crypto-depot.name.vn/api/role/url', {
             roleName: newRole.name,
             functionUrl: perm,
           })
@@ -170,7 +170,7 @@ const RoleManagement = () => {
 
   const handleDeleteRole = async (roleId: string) => {
     try {
-      await axios.delete(`http://14.225.206.68:8000/api/role/${roleId}`);
+      await axios.delete(`https://be-crypto-depot.name.vn/api/role/${roleId}`);
       setRoles(roles.filter((role) => role.id !== roleId));
       fetchRoles();
     } catch (error) {
@@ -255,7 +255,6 @@ const RoleManagement = () => {
               </TableHead>
               <TableBody>
                 {filteredRoles
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((role) => (
                     <TableRow key={role.id}>
                       <TableCell>

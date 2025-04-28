@@ -64,6 +64,7 @@ const CustomerManagement = () => {
     const router = useRouter();
     const [page, setPage] = useState<number>(0);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+    const [totalRows, setTotalRows] = useState<number>(0);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -85,19 +86,20 @@ const CustomerManagement = () => {
         const fetchCustomers = async () => {
             try {
                 setLoading(true);
-                const response = await fetch("https://be-crypto-depot.name.vn/api/users", {
+                const request = new URLSearchParams({ page: (page + 1).toString(), size: rowsPerPage.toString() }).toString();
+                const response = await fetch(`https://be-crypto-depot.name.vn/api/users?${request}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                     }
                 });
 
-                if (!response.ok) {
+                if (!response.ok) { 
                     throw new Error('Network response was not ok');
                 }
 
-                const data: { message: string; object: any[] } = await response.json();
-                const formattedCustomers: Customer[] = data.object.map((customer: any) => ({
+                const data: { content: any[]; page: any } = await response.json();
+                const formattedCustomers: Customer[] = data.content.map((customer: any) => ({
                     id: customer.id || `USR${Math.random().toString(36).substr(2, 9)}`,
                     // id: customer.id || ``,
                     first_name: customer.firstName || '',
@@ -107,7 +109,7 @@ const CustomerManagement = () => {
                     id_number: customer.walletAddress || '',
                     ranking_id: 'R001',
                     status_id: customer.hasAcceptedTerms ? 'S001' : 'S002',
-                    created_date: customer.dateOfBirth || new Date().toISOString(),
+                    created_date: customer.createdAt || new Date().toISOString(),
                     is_activated: customer.kycStatus || false,
                     kyc_status: customer.kycStatus ? 'verified' : 'pending',
                     type_siging_in: 'email',
@@ -116,6 +118,7 @@ const CustomerManagement = () => {
                 }));
 
                 setCustomers(formattedCustomers);
+                setTotalRows(data.page.totalElements);
             } catch (error) {
                 console.error('Error fetching customers:', error);
             } finally {
@@ -124,10 +127,10 @@ const CustomerManagement = () => {
         };
 
         fetchCustomers();
-    }, []);
+    }, [page, rowsPerPage]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
-         setPage(newPage);
+        setPage(newPage);
     };
 
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,7 +256,7 @@ const CustomerManagement = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>ID</TableCell>
+                                    <TableCell>No.</TableCell>
                                     <TableCell>Name</TableCell>
                                     <TableCell>Email</TableCell>
                                     <TableCell>Phone</TableCell>
@@ -267,10 +270,9 @@ const CustomerManagement = () => {
                             </TableHead>
                             <TableBody>
                                 {filteredCustomers
-                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    .map((customer: Customer) => (
+                                    .map((customer: Customer, index) => (
                                         <TableRow key={customer.id}>
-                                            <TableCell>{customer.id}</TableCell>
+                                            <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                                             <TableCell>{`${customer.first_name} ${customer.last_name}`}</TableCell>
                                             <TableCell>{customer.email}</TableCell>
                                             <TableCell>{customer.phone_num}</TableCell>
@@ -305,7 +307,7 @@ const CustomerManagement = () => {
                         <TablePagination
                             rowsPerPageOptions={[5, 10, 25]}
                             component="div"
-                            count={filteredCustomers.length}
+                            count={totalRows}
                             rowsPerPage={rowsPerPage}
                             page={page}
                             onPageChange={handleChangePage}
