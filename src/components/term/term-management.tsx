@@ -34,11 +34,19 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 interface InterestRate {
     id: string
-    term: string
-    rate: number
-    minBalance: number
-    status: "active" | "inactive"
+    amountMonth: string
+    interestRate: number
+    minimum: number
+    deleted: boolean 
 }
+
+// interface ServerInterestRate{
+//     id: string 
+//     amountMonth: number
+//     interestRate: number
+//     minimum: number
+//     deleted: boolean 
+// }
 
 interface FormData {
     term: string
@@ -50,50 +58,39 @@ interface FormData {
 
 
 const TermManagement: React.FC = () => {
-    const [interestRates, setInterestRates] = useState<InterestRate[]>([
-        {
-            id: "term001",
-            term: "1 month",
-            rate: 2.5,
-            minBalance: 5,
-            status: "active",
-        },
-        {
-            id: "term002",
-            term: "3 months",
-            rate: 3.0,
-            minBalance: 7,
-            status: "active",
-        },
-        {
-            id: "term003",
-            term: "6 months",
-            rate: 4.2,
-            minBalance: 10,
-            status: "active",
-        },
-        {
-            id: "term004",
-            term: "9 months",
-            rate: 4.8,
-            minBalance: 12,
-            status: "active",
-        },
-        {
-            id: "term005",
-            term: "12 months",
-            rate: 5.5,
-            minBalance: 20,
-            status: "active",
-        },
-        {
-            id: "term006",
-            term: "24 months",
-            rate: 6.5,
-            minBalance: 30,
-            status: "active",
-        },
-    ])
+    const [interestRates, setInterestRates] = useState<InterestRate[]>([])
+    // const [serverinterestRates, setServerInterestRates] = useState<ServerInterestRate[]>([])
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    //map func
+    // const mapToInterestRate = (serverData: ServerInterestRate[]): InterestRate[] => {
+    //     return serverData.map((item) => ({
+    //         id: item.id,
+    //         term: item.amountMonth.toString(),
+    //         rate: item.interestRate, 
+    //         minBalance: item.minimum,
+    //         status: item.deleted, // Convert boolean to string literal
+    //     }));
+    // };
+    //
+    useEffect(() => {
+        const fetchInterestRates = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/term/all-term');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch interest rates');
+                }
+                const data: InterestRate[] = await response.json();
+                console.log(data);
+                setInterestRates(data);
+                setLoading(false);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'An error occurred');
+                setLoading(false);
+            }
+        };
+        fetchInterestRates();
+    }, []);
 
     const [openDialog, setOpenDialog] = useState(false)
     const [selectedRate, setSelectedRate] = useState<InterestRate | null>(null)
@@ -108,10 +105,10 @@ const TermManagement: React.FC = () => {
         if (rate) {
             setSelectedRate(rate)
             setFormData({
-                term: rate.term,
-                rate: rate.rate.toString(),
-                minBalance: rate.minBalance.toString(),
-                status: rate.status,
+                term: rate.amountMonth,
+                rate: rate.interestRate.toString(),
+                minBalance: rate.minimum.toString(),
+                status: rate.deleted ?"active":"inactive",
             })
         } else {
             setSelectedRate(null)
@@ -129,28 +126,71 @@ const TermManagement: React.FC = () => {
         setFormData((prev) => ({ ...prev, [field]: value }))
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const newRate: InterestRate = {
             id: selectedRate ? selectedRate.id : `RATE${Date.now()}`,
-            term: formData.term,
-            rate: parseFloat(formData.rate),
-            minBalance: parseFloat(formData.minBalance),
-            status: formData.status,
+            amountMonth: formData.term,
+            interestRate: parseFloat(formData.rate),
+            minimum: parseFloat(formData.minBalance),
+            deleted: formData.status==="active"?true:false,
         }
 
-        if (selectedRate) {
-            setInterestRates((prev) =>
-                prev.map((rate) => (rate.id === selectedRate.id ? newRate : rate))
-            )
-        } else {
-            setInterestRates((prev) => [...prev, newRate])
+        try{
+            const method = selectedRate ? 'PUT' : 'POST';                           //Selected method
+
+            const endpoint = selectedRate
+            ? `http://localhost:8000/term/update-term-interest-rate`              // Update endpoint
+            : 'http://localhost:8000/term/add-term';                                                 // Create endpoint
+            //
+            console.log(`${method} ${endpoint}`)
+            const response = await fetch(endpoint, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newRate),
+            });
+
+            if(response.ok){
+            const updatedRate = await response.json();
+            console.log(updatedRate)
+            if (selectedRate) {
+                setInterestRates((prev) =>
+                    prev.map((rate) => (rate.id === selectedRate.id ? updatedRate : rate))
+                )
+            } else {
+                setInterestRates((prev) => [...prev, updatedRate])
+            }
+            }
+            else {
+                throw new Error(`Failed to ${selectedRate ? 'update' : 'create'} rate: ${response.statusText}`);
+            }
+
+        }catch(error){
+            console.error('Error submitting rate:', error);
+            // Optionally, show an error message to the user
+            alert('An error occurred while submitting the rate. Please try again.');
         }
         handleCloseDialog()
     }
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm("Are you sure you want to delete this interest rate?")) {
-            setInterestRates((prev) => prev.filter((rate) => rate.id !== id))
+            const endpoint= `http://localhost:8000/term/delete-term`
+            const response = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: id,
+                });
+
+            if(response.ok){
+                setInterestRates((prev) => prev.filter((rate) => rate.id !== id))
+            }else{
+
+            }
+            
         }
     }
 
@@ -188,18 +228,18 @@ const TermManagement: React.FC = () => {
                                 {interestRates.map((rate) => (
                                     <TableRow key={rate.id}>
                                         <TableCell>{rate.id}</TableCell>
-                                        <TableCell>{rate.term}</TableCell>
-                                        <TableCell sx={{paddingLeft:20}} >{rate.rate}</TableCell>
-                                        <TableCell sx={{paddingLeft:20}} >{rate.minBalance}</TableCell>
+                                        <TableCell>{rate.amountMonth}</TableCell>
+                                        <TableCell sx={{paddingLeft:20}} >{rate.interestRate}</TableCell>
+                                        <TableCell sx={{paddingLeft:20}} >{rate.minimum}</TableCell>
                                         <TableCell>
                                             <Chip
-                                                label={rate.status === "active" ? "Active" : "Inactive"}
-                                                color={rate.status === "active" ? "success" : "default"}
+                                                label={!rate.deleted ? "Active" : "Inactive"}
+                                                color={!rate.deleted ? "success" : "default"}
                                                 size="small"
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <IconButton onClick={() => handleOpenDialog(rate)}>
+                                            <IconButton onClick={() => handleOpenDialog(rate)} >
                                                 <EditIcon />
                                             </IconButton>
                                             <IconButton onClick={() => handleDelete(rate.id)}>
@@ -224,6 +264,7 @@ const TermManagement: React.FC = () => {
                                 label="Term (e.g., 6 months)"
                                 value={formData.term}
                                 onChange={(e) => handleFormChange("term", e.target.value)}
+                                disabled={selectedRate != null}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -252,6 +293,7 @@ const TermManagement: React.FC = () => {
                                 label="Status"
                                 value={formData.status}
                                 onChange={(e) => handleFormChange("status", e.target.value)}
+                                disabled={selectedRate != null}
                                 SelectProps={{ native: true }}
                             >
                                 <option value="active">Active</option>

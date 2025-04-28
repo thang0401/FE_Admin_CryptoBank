@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import {
   Box,
@@ -26,36 +24,32 @@ interface FilterControlsProps {
   tabValue: number
   searchTerm: string
   filterStatus: "all" | "pending" | "approved" | "rejected"
-  filterType: "all" | "buy" | "sell"
   startDate: Date | null
   endDate: Date | null
   showHistoryFilters: boolean
   handleTabChange: (event: React.SyntheticEvent, newValue: number) => void
   handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleStatusFilterChange: (event: React.ChangeEvent<{ value: unknown }>) => void
-  handleTypeFilterChange: (event: React.ChangeEvent<{ value: unknown }>) => void
   handleStartDateChange: (date: Date | null) => void
   handleEndDateChange: (date: Date | null) => void
   handleRefresh: () => void
-  hideTypeFilter?: boolean
+  orderType?: "buy" | "sell"
 }
 
 const FilterControls: React.FC<FilterControlsProps> = ({
   tabValue,
   searchTerm,
   filterStatus,
-  filterType,
   startDate,
   endDate,
   showHistoryFilters,
   handleTabChange,
   handleSearchChange,
   handleStatusFilterChange,
-  handleTypeFilterChange,
   handleStartDateChange,
   handleEndDateChange,
   handleRefresh,
-  hideTypeFilter = false,
+  orderType,
 }) => {
   return (
     <>
@@ -67,10 +61,16 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         mb={3}
         gap={2}
       >
-        <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
-          <Tab label="Pending Orders" />
-          <Tab label="History Orders" />
-        </Tabs>
+        {orderType === "buy" ? (
+          <Typography variant="h6" fontWeight="bold">
+            History Orders
+          </Typography>
+        ) : (
+          <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
+            <Tab label="Pending Orders" />
+            <Tab label="History Orders" />
+          </Tabs>
+        )}
 
         <Box display="flex" gap={2}>
           <TextField
@@ -97,39 +97,24 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             Filters
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={hideTypeFilter ? 4 : 3}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="status-filter-label">Status</InputLabel>
-                <Select
-                  labelId="status-filter-label"
-                  value={filterStatus}
-                  label="Status"
-                  onChange={handleStatusFilterChange as any}
-                >
-                  <MenuItem value="all">All Statuses</MenuItem>
-                  <MenuItem value="approved">Approved</MenuItem>
-                  <MenuItem value="rejected">Rejected</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            {!hideTypeFilter && (
-              <Grid item xs={12} sm={6} md={3}>
+            {((orderType !== "buy" && tabValue === 1) || orderType === "buy") && (
+              <Grid item xs={12} sm={6} md={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel id="type-filter-label">Type</InputLabel>
+                  <InputLabel id="status-filter-label">Status</InputLabel>
                   <Select
-                    labelId="type-filter-label"
-                    value={filterType}
-                    label="Type"
-                    onChange={handleTypeFilterChange as any}
+                    labelId="status-filter-label"
+                    value={filterStatus}
+                    label="Status"
+                    onChange={handleStatusFilterChange as any}
                   >
-                    <MenuItem value="all">All Types</MenuItem>
-                    <MenuItem value="buy">Buy</MenuItem>
-                    <MenuItem value="sell">Sell</MenuItem>
+                    <MenuItem value="all">All Statuses</MenuItem>
+                    <MenuItem value="approved">Approved</MenuItem>
+                    <MenuItem value="rejected">Rejected</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
             )}
-            <Grid item xs={12} sm={6} md={hideTypeFilter ? 4 : 3}>
+            <Grid item xs={12} sm={6} md={((orderType !== "buy" && tabValue === 1) || orderType === "buy") ? 4 : 6}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="Start Date"
@@ -140,7 +125,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 />
               </LocalizationProvider>
             </Grid>
-            <Grid item xs={12} sm={6} md={hideTypeFilter ? 4 : 3}>
+            <Grid item xs={12} sm={6} md={((orderType !== "buy" && tabValue === 1) || orderType === "buy") ? 4 : 6}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="End Date"
