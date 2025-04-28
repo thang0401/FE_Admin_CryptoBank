@@ -49,34 +49,7 @@ const formatDate = (dateString: string) => {
   return format(date, 'dd/MM/yyyy')
 }
 
-const mockAccounts: SavingsAccount[] = [
-  {
-    id: 'SAV001',
-    status: 'active',
-    heirStatus: 'no_heir',
-    owner: { id: 'USRER001', name: 'Nguyen Van Thuan', email: 'thuannv.it@gmail.com', phone: '+8434567890' },
-    term: '12 months',
-    startDate: '2024-02-24',
-    endDate: '2025-02-24',
-    balance: '50 USDC',
-    supportStaff: 'Staff01',
-    contractUrl: '',
-    googleDriveUrl: ''
-  },
-  {
-    id: 'SAV002',
-    status: 'pending',
-    heirStatus: 'has_heir',
-    owner: { id: 'USRER002', name: 'Tran Huu Luan', email: 'luantr@gmail.com', phone: '+8434567891' },
-    term: '6 months',
-    startDate: '2024-02-25',
-    endDate: '2024-08-25',
-    balance: '3 USDC',
-    supportStaff: 'Staff02',
-    contractUrl: '',
-    googleDriveUrl: ''
-  }
-]
+const mockAccounts: SavingsAccount[] = []
 
 const AccountDetails: React.FC = () => {
   const router = useRouter()

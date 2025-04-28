@@ -105,6 +105,7 @@ const SavingsManagement: React.FC = () => {
       }
 
       const data: SavingsAccount[] = await response.json()
+      console.log(data)
       setFilteredAccounts(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
@@ -112,7 +113,7 @@ const SavingsManagement: React.FC = () => {
       setLoading(false)
     }
   }
-
+  
   const handleFilterChange = (field: keyof Filters, value: any) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
   }
