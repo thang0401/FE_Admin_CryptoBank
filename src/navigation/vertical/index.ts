@@ -66,6 +66,11 @@ const navigation = (): VerticalNavItemsType => {
           path: "/term-management",
         },
         {
+          icon: "bx:grid-alt",
+          title: "Quản lý mã giới thiệu",
+          path: "/referrals"
+        },
+        {
           title: "USDC Orders Management",
           icon: "bx:envelope",
           children: [
@@ -101,8 +106,11 @@ const navigation = (): VerticalNavItemsType => {
           title: "Information",
           path: "/user-profile/notification/",
         },
+
       ],
-    },
+
+    }
+
   ]
 }
 
