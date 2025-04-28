@@ -82,17 +82,15 @@ const CustomerDetails: React.FC = () => {
                     throw new Error(`Error fetching customer data: ${response.status}`);
                 }
 
-                const data = await response.json();
-                console.log("API response:", data);
-
-                const userData = data.object;
+                const userData = await response.json();
+                console.log("API response:", userData);
 
                 const mappedCustomer: Customer = {
                     id: userData.id || id as string,
                     username: userData.username || "",
                     email: userData.email || "",
                     fullName: userData.fullName || `${userData.firstName || ''} ${userData.middleName || ''} ${userData.lastName || ''}`.trim() || "",
-                    avatarUrl: userData.avatarUrl || "",
+                    avatarUrl: userData.avatar || "",
                     firstName: userData.firstName || "",
                     middleName: userData.middleName || "",
                     lastName: userData.lastName || "",
@@ -108,9 +106,9 @@ const CustomerDetails: React.FC = () => {
                     kycStatus: userData.kycStatus === true ? "Active" : userData.kycStatus === "Pending" ? "Pending" : "Inactive",
                     hasAcceptedTerms: userData.hasAcceptedTerms || false,
                     lastLoginAt: userData.lastLoginAt || "",
-                    idCardFrontImgUrl: null,
-                    idCardBackImgUrl: null,
-                    idNumber: null,
+                    idCardFrontImgUrl: userData.idCardFrontImgUrl || null,
+                    idCardBackImgUrl: userData.idCardBackImgUrl || null,
+                    idNumber: userData.idNumber || null,
                 };
 
                 console.log("Mapped customer:", mappedCustomer);

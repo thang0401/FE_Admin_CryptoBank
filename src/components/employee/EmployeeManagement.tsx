@@ -88,6 +88,7 @@ const EmployeeManagement = () => {
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalRows, setTotalRows] = useState(0);
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
@@ -124,47 +125,70 @@ const EmployeeManagement = () => {
       setError(null);
 
       try {
-        // const response = await fetch("/api/employees", {
-        //   method: "GET",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        // });
+        const request = new URLSearchParams({ page: (page + 1).toString(), size: rowsPerPage.toString() }).toString();
+        const response = await fetch(`https://be-crypto-depot.name.vn/api/employees?${request}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-        // if (!response.ok) {
-        //   throw new Error("Failed to fetch employees");
-        // }
+        if (!response.ok) {
+          throw new Error("Failed to fetch employees");
+        }
 
-        // const data = await response.json();
-        // setEmployees(data); // Giả sử server trả về mảng nhân viên
-             
+        const data: { content: any[]; page: any } = await response.json();
+        const formattedEmployees: Employee[] = data.content.map((employee: any) => ({
+          id: employee.id,
+          avatar: employee.avatar || "",
+          name: employee.fullName || "",
+          username: employee.username || "",
+          password: employee.password || "",
+          role: employee.role || "",
+          billing: employee.billing || "",
+          status: employee.status || "",
+          employment_type: employee.employmentType || "",
+          marital_status: employee.maritalStatus || "Single",
+          hire_date: employee.hireDate || new Date().toISOString(),
+          termination_date: employee.terminationDate || null,
+          salary: employee.salary || 0,
+          bonus: employee.bonus || 0,
+          bank_account: employee.bankAccount || "",
+          bank_name: employee.bankName || "",
+          insurance_number: employee.insuranceNumber || "",
+          tax_code: employee.taxCode || "",
+          emergency_contact_name: employee.emergencyContactName || "",
+          emergency_contact_phone: employee.emergencyContactPhone || "",
+        }));
+        setEmployees(formattedEmployees); // Giả sử server trả về mảng nhân viên
+        setTotalRows(data.page.totalElements);
               
-                const mockData: Employee[] = [
-                  {
-                  id: "1",
-                  avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-                  name: "Galen Slixby",
-                  username: "gslixby0",
-                  password: "",
-                  role: "Editor",
-                  billing: "Auto Debit",
-                  status: "Active",
-                  employment_type: "Full-time",
-                  marital_status: "Single",
-                  hire_date: "2023-01-15",
-                  termination_date: null,
-                  salary: 5000000,
-                  bonus: 500000,
-                  bank_account: "123456789",
-                  bank_name: "VietcomBank",
-                  insurance_number: "INS123456",
-                  tax_code: "TAX123456",
-                  emergency_contact_name: "Emergency Contact",
-                  emergency_contact_phone: "0987654321",
-                }
-                ]
+                // const mockData: Employee[] = [
+                //   {
+                //   id: "1",
+                //   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+                //   name: "Galen Slixby",
+                //   username: "gslixby0",
+                //   password: "",
+                //   role: "Editor",
+                //   billing: "Auto Debit",
+                //   status: "Active",
+                //   employment_type: "Full-time",
+                //   marital_status: "Single",
+                //   hire_date: "2023-01-15",
+                //   termination_date: null,
+                //   salary: 5000000,
+                //   bonus: 500000,
+                //   bank_account: "123456789",
+                //   bank_name: "VietcomBank",
+                //   insurance_number: "INS123456",
+                //   tax_code: "TAX123456",
+                //   emergency_contact_name: "Emergency Contact",
+                //   emergency_contact_phone: "0987654321",
+                // }
+                // ]
         
-                setEmployees(mockData);
+                // setEmployees(mockData);
       } catch (err) {
         // Ép kiểu err thành Error hoặc kiểm tra kiểu
         if (err instanceof Error) {
@@ -178,7 +202,7 @@ const EmployeeManagement = () => {
     };
 
     fetchEmployees();
-  }, []);
+  }, [page, rowsPerPage]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -194,7 +218,7 @@ const EmployeeManagement = () => {
     setError(null);
 
     try {
-      const response = await fetch("/api/employees", {
+      const response = await fetch("https://be-crypto-depot.name.vn/api/employees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
