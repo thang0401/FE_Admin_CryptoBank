@@ -36,6 +36,7 @@ import {
 } from "@mui/material"
 import { useRouter } from "next/router" // Page Router
 import { ArrowLeft, Edit, Save, Plus, X, Camera, Trash2 } from "lucide-react"
+import { DataArray } from "@mui/icons-material"
 
 // Updated interface to match the new requirements
 interface Role {
@@ -160,46 +161,72 @@ const EmployeeDetails = () => {
 
       try {
         // In a real application, you would fetch from your API
-        // const response = await fetch(`/api/users/${id}`);
-        // if (!response.ok) throw new Error("Failed to fetch user details");
-        // const data = await response.json();
-        // setUser(data);
+        const response = await fetch(`https://be-crypto-depot.name.vn/api/employees/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch user details");
+        const data = await response.json();
+        const formattedEmployee: User = {
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          fullName: `${data.firstName || ""}`,
+          phoneNumber: data.phoneNumber || "",
+          gender: data.gender || "other",
+          dateOfBirth: data.dateOfBirth || null,
+          kycStatus: data.kycStatus || "",
+          status: data.status || "",
+          roles: [],
+          avatar: data.avatar,
+          employment_type: data.employmentType,
+          hire_date: data.hireDate,
+          termination_date: data.terminationDate || null,
+          salary: data.salary,
+          bonus: data.bonus || 0,
+          marital_status: data.maritalStatus || null,
+          billing: data.billing || null,
+          bank_account: data.bankAccount || null,
+          bank_name: data.bankName || null,
+          insurance_number: data.insuranceNumber || null,
+          tax_code: data.taxCode || null, 
+          emergency_contact_name: data.emergencyContactName || null,
+          emergency_contact_phone: data.emergencyContactPhone || null
+        };
+        setUser(formattedEmployee);
 
         // Mock data for demonstration
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        // await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        const mockUser: User = {
-          id: id as string,
-          username: "johndoe",
-          email: "john.doe@example.com",
-          fullName: "John Doe",
-          phoneNumber: "+1 (555) 123-4567",
-          gender: "male",
-          dateOfBirth: "1990-05-15",
-          kycStatus: "verified",
-          status: "active",
-          roles: [
-            { id: "1", name: "User", description: "Regular user access" },
-            { id: "2", name: "Editor", description: "Can edit content" },
-          ],
-          avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-          // Additional mock data for employment details
-          employment_type: "Full-time",
-          hire_date: "2022-03-15",
-          termination_date: null,
-          salary: 5000000,
-          bonus: 500000,
-          marital_status: "Single",
-          billing: "Bank Transfer",
-          bank_account: "9876543210",
-          bank_name: "VietcomBank",
-          insurance_number: "INS123456789",
-          tax_code: "TAX987654321",
-          emergency_contact_name: "Jane Doe",
-          emergency_contact_phone: "+1 (555) 987-6543",
-        }
+        // const mockUser: User = {
+        //   id: id as string,
+        //   username: "johndoe",
+        //   email: "john.doe@example.com",
+        //   fullName: "John Doe",
+        //   phoneNumber: "+1 (555) 123-4567",
+        //   gender: "male",
+        //   dateOfBirth: "1990-05-15",
+        //   kycStatus: "verified",
+        //   status: "active",
+        //   roles: [
+        //     { id: "1", name: "User", description: "Regular user access" },
+        //     { id: "2", name: "Editor", description: "Can edit content" },
+        //   ],
+        //   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+        //   // Additional mock data for employment details
+        //   employment_type: "Full-time",
+        //   hire_date: "2022-03-15",
+        //   termination_date: null,
+        //   salary: 5000000,
+        //   bonus: 500000,
+        //   marital_status: "Single",
+        //   billing: "Bank Transfer",
+        //   bank_account: "9876543210",
+        //   bank_name: "VietcomBank",
+        //   insurance_number: "INS123456789",
+        //   tax_code: "TAX987654321",
+        //   emergency_contact_name: "Jane Doe",
+        //   emergency_contact_phone: "+1 (555) 987-6543",
+        // }
 
-        setUser(mockUser)
+        // setUser(mockUser)
 
         // Mock available roles
         setAvailableRoles([
