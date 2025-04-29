@@ -158,7 +158,7 @@ const VerticalNavLink = ({
               ...(parent && { mr: 4.25, color: 'text.disabled' }),
             }}
           >
-            <UserIcon icon={icon as string} fontSize={parent ? '1rem' : '2rem'} /> {/* Tăng kích thước icon */}
+            <UserIcon icon={icon as string} fontSize={parent ? '1.5rem' : '1.5rem'} /> {/* Tăng kích thước icon */}
           </ListItemIcon>
 
           <MenuItemTextMetaWrapper
