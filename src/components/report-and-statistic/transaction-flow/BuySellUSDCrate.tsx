@@ -3,7 +3,7 @@ import Card from '@mui/material/Card'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
-
+import React, { useState, useEffect } from "react"
 // ** Third Party Imports
 import { ApexOptions } from 'apexcharts'
 
@@ -12,13 +12,57 @@ import ReactApexcharts from 'src/@core/components/react-apexcharts'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
+import { by } from '@fullcalendar/core/internal-common'
 
-const series = [{ data: [11, 7, 11, 20,11, 7, 11, 20,11, 7, 11, 20] }, { data: [9, 5, 15, 18,9, 5, 15, 18,9, 5, 15, 18] }]
+
+// const series = [{ data: [11, 7, 11, 20,11, 7, 11, 20,11, 7, 11, 20] }, { data: [9, 5, 15, 18,9, 5, 15, 18,9, 5, 15, 18] }]
+
+const FALLBACK_BUY_RATIOS = [11, 7, 11, 20, 11, 7, 11, 20, 11, 7, 11, 20];
+const FALLBACK_SELL_RATIOS = [9, 5, 15, 18, 9, 5, 15, 18, 9, 5, 15, 18];
+
+interface USDCData {
+  totalTransaction: number
+  buyRatios: number[];
+  sellRatios: number[];
+}
+
 
 const SellUSDCrate = () => {
   // ** Hook
   const theme = useTheme()
+  const [buyUSDCRatio, setBuyUSDCRatio] = useState<number[]>([]);
+  const [sellUSDCRatio, setSellUSDCRatio] = useState<number[]>([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const currentYear = new Date().getFullYear();
+        const response = await fetch(`https://be-crypto-depot.name.vn/report-and-statistic/transaction-flow/usdc-buy-sell-ratio?targetYear=${currentYear}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data: USDCData = await response.json();
+        console.log(data)
+        // Update state with fetched data or fallback
+        setBuyUSDCRatio(data.buyRatios);
+        setSellUSDCRatio(data.sellRatios);
+        console.log(buyUSDCRatio)
+        console.log(sellUSDCRatio)
+      } catch (error) {
+        console.error('Error fetching USDC ratios:', error);
+        // Fallback to static data
+        setBuyUSDCRatio(FALLBACK_BUY_RATIOS);
+        setSellUSDCRatio(FALLBACK_SELL_RATIOS);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  const series: ApexAxisChartSeries = [
+    { data: buyUSDCRatio },
+    { data: sellUSDCRatio }
+  ];
 
+  console.log(series)
   const options: ApexOptions = {
     chart: {
       parentHeightOffset: 0,

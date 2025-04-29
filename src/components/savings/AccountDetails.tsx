@@ -68,9 +68,10 @@ const AccountDetails: React.FC = () => {
   }, [id])
 
   const fetchContractData = async (savingAccountId: string) => {
+    console.log(savingAccountId)
     try {
       const contract = getContract()
-      const data = await contract.methods.getContractDetails(savingAccountId).call()
+      const data = await contract.methods.getContractDetails("SAV001").call()
       const account: SavingsAccount = {
         id: data.savingAccountId,
         status: data.status as 'active' | 'pending' | 'completed',
