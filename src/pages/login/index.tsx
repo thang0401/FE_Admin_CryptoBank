@@ -268,8 +268,8 @@ const LoginPage = () => {
                 <LinkStyled href='/register'>Create an account</LinkStyled>
               </Typography>
             </Box>
-            <Divider sx={{ my: `${theme.spacing(6)} !important` }}>or</Divider>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* <Divider sx={{ my: `${theme.spacing(6)} !important` }}>or</Divider> */}
+            {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <IconButton
                 href='/'
                 component={Link}
@@ -302,7 +302,7 @@ const LoginPage = () => {
               >
                 <Icon icon='bxl:google' />
               </IconButton>
-            </Box>
+            </Box> */}
           </form>
         </Box>
       </RightWrapper>
