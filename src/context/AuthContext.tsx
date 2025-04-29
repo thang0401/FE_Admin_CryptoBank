@@ -1,104 +1,119 @@
-// ** React Imports
-import { createContext, useEffect, useState, ReactNode } from 'react'
+// AuthProvider.tsx
+import { createContext, useEffect, useState, ReactNode } from 'react';
+import { useRouter } from 'next/router';
+import axios from 'axios';
+import authConfig from 'src/configs/auth';
+import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types';
 
-// ** Next Import
-import { useRouter } from 'next/router'
-
-// ** Axios
-import axios from 'axios'
-
-// ** Config
-import authConfig from 'src/configs/auth'
-
-// ** Types
-import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
-
-// ** Defaults
 const defaultProvider: AuthValuesType = {
   user: null,
   loading: true,
   setUser: () => null,
   setLoading: () => Boolean,
   login: () => Promise.resolve(),
-  logout: () => Promise.resolve()
-}
+  logout: () => Promise.resolve(),
+};
 
-const AuthContext = createContext(defaultProvider)
+const AuthContext = createContext(defaultProvider);
 
 type Props = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 const AuthProvider = ({ children }: Props) => {
-  // ** States
-  const [user, setUser] = useState<UserDataType | null>(defaultProvider.user)
-  const [loading, setLoading] = useState<boolean>(defaultProvider.loading)
-
-  // ** Hooks
-  const router = useRouter()
+  const [user, setUser] = useState<UserDataType | null>(defaultProvider.user);
+  const [loading, setLoading] = useState<boolean>(defaultProvider.loading);
+  const router = useRouter();
 
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
+      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!;
       if (storedToken) {
-        setLoading(true)
+        setLoading(true);
         await axios
           .get(authConfig.meEndpoint, {
             headers: {
-              Authorization: storedToken
-            }
+              Authorization: storedToken,
+            },
           })
-          .then(async response => {
-            setLoading(false)
-            setUser({ ...response.data.userData })
+          .then(async (response) => {
+            setLoading(false);
+            setUser({ ...response.data.userData });
           })
           .catch(() => {
-            localStorage.removeItem('userData')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('accessToken')
-            setUser(null)
-            setLoading(false)
+            localStorage.removeItem('userData');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('accessToken');
+            setUser(null);
+            setLoading(false);
             if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
-              router.replace('/login')
+              router.replace('/login');
             }
-          })
+          });
       } else {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    initAuth()
+    initAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
     axios
       .post(authConfig.loginEndpoint, params)
-      .then(async response => {
+      .then(async (response) => {
         params.rememberMe
           ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
-          : null
-        const returnUrl = router.query.returnUrl
+          : null;
 
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
+        const userData = response.data.userData;
+        setUser(userData);
+        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(userData)) : null;
 
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        let redirectURL = '/';
+        if (!userData.isChangePass) {
+          redirectURL = '/change-pass';
+        } else {
+          switch (userData.role) {
+            case 'ADMIN':
+              redirectURL = '/report-and-statistic/transaction-flow';
+              break;
+            case 'EMPLOYEE_BUYS_USDC':
+              redirectURL = '/usdc-orders-management/buy-orders';
+              break;
+            case 'EMPLOYEE_SELLS_USDC':
+              redirectURL = '/usdc-orders-management/sell-orders';
+              break;
+            case 'EMPLOYEE':
+              redirectURL = '/customer-management';
+              break;
+            case 'HR':
+              redirectURL = '/employee-management';
+              break;
+            default:
+              redirectURL = '/';
+          }
+        }
 
-        router.replace(redirectURL as string)
+        const returnUrl = router.query.returnUrl;
+        // Xử lý returnUrl để đảm bảo nó là string
+        const returnUrlString = Array.isArray(returnUrl) ? returnUrl[0] : returnUrl;
+        redirectURL = returnUrlString && returnUrlString !== '/' ? returnUrlString : redirectURL;
+
+        router.replace(redirectURL);
       })
-
-      .catch(err => {
-        if (errorCallback) errorCallback(err)
-      })
-  }
+      .catch((err) => {
+        if (errorCallback) errorCallback(err);
+      });
+  };
 
   const handleLogout = () => {
-    setUser(null)
-    window.localStorage.removeItem('userData')
-    window.localStorage.removeItem(authConfig.storageTokenKeyName)
-    router.push('/login')
-  }
+    setUser(null);
+    window.localStorage.removeItem('userData');
+    window.localStorage.removeItem(authConfig.storageTokenKeyName);
+    router.push('/login');
+  };
 
   const values = {
     user,
@@ -106,10 +121,10 @@ const AuthProvider = ({ children }: Props) => {
     setUser,
     setLoading,
     login: handleLogin,
-    logout: handleLogout
-  }
+    logout: handleLogout,
+  };
 
-  return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>
-}
+  return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
+};
 
-export { AuthContext, AuthProvider }
+export { AuthContext, AuthProvider };
