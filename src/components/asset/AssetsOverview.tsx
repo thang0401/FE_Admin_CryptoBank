@@ -335,7 +335,7 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={3}>
+          {/* <Grid item xs={12} md={3}>
             <Card sx={{ height: "100%", backgroundColor: cardBackgroundColors.LINK, boxShadow: 3 }}>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: "medium" }}>
@@ -347,7 +347,7 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
                 <Typography variant="body2">Last updated: Today, 9:45 AM</Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Grid> */}
         </Grid>
 
         {/* Alerts Section */}

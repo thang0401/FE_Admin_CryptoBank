@@ -1262,11 +1262,6 @@
   dependencies:
     merge-options "^3.0.4"
 
-"@react-oauth/google@^0.12.1":
-  version "0.12.1"
-  resolved "https://registry.npmjs.org/@react-oauth/google/-/google-0.12.1.tgz"
-  integrity sha512-qagsy22t+7UdkYAiT5ZhfM4StXi9PPNvw0zuwNmabrWyMKddczMtBIOARflbaIj+wHiQjnMAsZmzsUYuXeyoSg==
-
 "@reduxjs/toolkit@^1.9.3":
   version "1.9.3"
   resolved "https://registry.npmjs.org/@reduxjs/toolkit/-/toolkit-1.9.3.tgz"

@@ -12,20 +12,105 @@ import { UserDataType } from 'src/context/types'
 
 const users: UserDataType[] = [
   {
-    id: 1,
-    role: 'admin',
+    id: 'd027fqa0dvbkmmmsoc40',
+    role: 'ADMIN',
     password: 'admin',
-    fullName: 'Nguyễn Cao Thăng',
-    username: 'thangadmin',
-    email: 'thangadmin@gmail.com'
+    fullName: 'Trần Tín',
+    username: 'tin@gmail.com',
+    email: 'tin@gmail.com',
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c',
+    isChangePass: false,
+    url: [
+      '/report-and-statistic/transaction-flow',
+      '/report-and-statistic/risk-and-security',
+      '/report-and-statistic/customer-and-promotion',
+      '/asset-management',
+      '/customer-management',
+      '/transactions-management',
+      '/employee-management',
+      '/role-management',
+      '/savings-management',
+      '/term-management',
+      '/referrals',
+      '/usdc-orders-management/buy-orders',
+      '/usdc-orders-management/sell-orders',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/'
+    ]
   },
   {
-    id: 2,
-    role: 'client',
-    password: 'client',
+    id: 'employee-002',
+    role: 'EMPLOYEE_BUYS_USDC',
+    password: 'admin',
     fullName: 'Nguyễn Cao Thăng',
-    username: 'thangclient',
-    email: 'thangclient@gmail.com'
+    username: 'thang@gmail.com',
+    email: 'thang@gmail.com',
+    isChangePass: false,
+    url: [
+      '/usdc-orders-management/buy-orders',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/'
+    ],
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c'
+  },
+  {
+    id: 'employee-002',
+    role: 'EMPLOYEE_SELLS_USDC',
+    password: 'admin',
+    fullName: 'Phạm Văn Phong',
+    username: 'phongpvps36848@fpt.edu.vn',
+    email: 'phongpvps36848@fpt.edu.vn',
+    isChangePass: false,
+    url: [
+
+      '/usdc-orders-management/sell-orders',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/'
+    ],
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c'
+  }
+
+
+  ,{
+    id: 'hr-002',
+    role: 'HR',
+    password: 'admin',
+    fullName: 'Trương Gia Hào',
+    username: 'haotgps36996@fpt.edu.vn',
+    email: 'haotgps36996@fpt.edu.vn',
+    isChangePass: false, // Sẽ điều hướng đến /employee-management
+    url: [
+      '/employee-management',
+      '/role-management',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/',
+    ],
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c',
+  },
+  // Tài khoản 3: Role EMPLOYEE, isChangePass: false
+  {
+    id: 'employee-001',
+    role: 'EMPLOYEE',
+    password: 'admin',
+    fullName: 'Bội Châu',
+    username: 'chautnbps36863@fpt.edu.vn',
+    email: 'chautnbps36863@fpt.edu.vn',
+    isChangePass: false, // Sẽ điều hướng đến /changePass
+    url: [
+      '/customer-management',
+      '/transactions-management',
+      '/savings-management',
+      '/term-management',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/',
+      '/referrals',
+    ],
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c',
   }
 ]
 
@@ -62,50 +147,6 @@ mock.onPost('/jwt/login').reply(request => {
     }
 
     return [400, { error }]
-  }
-})
-
-mock.onPost('/jwt/register').reply(request => {
-  if (request.data.length > 0) {
-    const { email, password, username } = JSON.parse(request.data)
-    const isEmailAlreadyInUse = users.find(user => user.email === email)
-    const isUsernameAlreadyInUse = users.find(user => user.username === username)
-    const error = {
-      email: isEmailAlreadyInUse ? 'This email is already in use.' : null,
-      username: isUsernameAlreadyInUse ? 'This username is already in use.' : null
-    }
-
-    if (!error.username && !error.email) {
-      const { length } = users
-      let lastIndex = 0
-      if (length) {
-        lastIndex = users[length - 1].id
-      }
-      const userData = {
-        id: lastIndex + 1,
-        email,
-        password,
-        username,
-        avatar: null,
-        fullName: '',
-        role: 'admin'
-      }
-
-      users.push(userData)
-
-      const accessToken = jwt.sign({ id: userData.id }, jwtConfig.secret as string)
-
-      const user = { ...userData }
-      delete user.password
-
-      const response = { accessToken }
-
-      return [200, response]
-    }
-
-    return [200, { error }]
-  } else {
-    return [401, { error: 'Invalid Data' }]
   }
 })
 

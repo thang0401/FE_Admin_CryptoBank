@@ -78,7 +78,7 @@ const schema = yup.object().shape({
 
 const defaultValues = {
   password: 'admin',
-  email: 'thangadmin@gmail.com'
+  email: 'tin@gmail.com'
 }
 
 interface FormData {
@@ -173,14 +173,23 @@ const LoginPage = () => {
           <Typography sx={{ mb: 6, color: 'text.secondary' }}>
             Please sign-in to your account and start the adventure
           </Typography>
-          {/* <Alert icon={false} sx={{ py: 3, mb: 6, ...bgColors.primaryLight, '& .MuiAlert-message': { p: 0 } }}>
-            <Typography variant='caption' sx={{ mb: 2, display: 'block', color: 'primary.main' }}>
-              Admin: <strong>admin@sneat.com</strong> / Pass: <strong>admin</strong>
+
+            <Typography variant='caption' sx={{  display: 'block', color: 'primary.main' }}>
+            ADMIN: <strong>tin@gmail.com</strong> / Pass: <strong>admin</strong>
             </Typography>
             <Typography variant='caption' sx={{ display: 'block', color: 'primary.main' }}>
-              Client: <strong>client@sneat.com</strong> / Pass: <strong>client</strong>
+            EMPLOYEE_BUYS_USDC: <strong>thang@gmail.com</strong> / Pass: <strong>admin</strong>
             </Typography>
-          </Alert> */}
+            <Typography variant='caption' sx={{  display: 'block', color: 'primary.main' }}>
+            EMPLOYEE_SELLS_USDC: <strong>phongpvps36848@fpt.edu.vn</strong> / Pass: <strong>admin</strong>
+            </Typography>
+            <Typography variant='caption' sx={{ display: 'block', color: 'primary.main' }}>
+            HR: <strong>haotgps36996@fpt.edu.vn</strong> / Pass: <strong>admin</strong>
+            </Typography>
+            <Typography variant='caption' sx={{ display: 'block', color: 'primary.main' }}>
+            EMPLOYEE: <strong>chautnbps36863@fpt.edu.vn</strong> / Pass: <strong>admin</strong>
+            </Typography>
+
           <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
             <FormControl fullWidth sx={{ mb: 4 }}>
               <Controller
@@ -259,8 +268,8 @@ const LoginPage = () => {
                 <LinkStyled href='/register'>Create an account</LinkStyled>
               </Typography>
             </Box>
-            <Divider sx={{ my: `${theme.spacing(6)} !important` }}>or</Divider>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* <Divider sx={{ my: `${theme.spacing(6)} !important` }}>or</Divider> */}
+            {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <IconButton
                 href='/'
                 component={Link}
@@ -293,7 +302,7 @@ const LoginPage = () => {
               >
                 <Icon icon='bxl:google' />
               </IconButton>
-            </Box>
+            </Box> */}
           </form>
         </Box>
       </RightWrapper>

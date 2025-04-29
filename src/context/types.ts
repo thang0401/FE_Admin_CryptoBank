@@ -15,13 +15,15 @@ export type RegisterParams = {
 }
 
 export type UserDataType = {
-  id: number
+  id: string
   role: string
   email: string
   fullName: string
   username: string
   password: string
   avatar?: string | null
+  isChangePass : boolean
+  url :string[]
 }
 
 export type AuthValuesType = {
