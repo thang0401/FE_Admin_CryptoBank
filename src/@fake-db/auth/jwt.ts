@@ -16,7 +16,7 @@ const users: UserDataType[] = [
     role: 'ADMIN',
     password: 'admin',
     fullName: 'Trần Tín',
-    username: 'tin',
+    username: 'tin@gmail.com',
     email: 'tin@gmail.com',
     avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c',
     isChangePass: false,
@@ -42,11 +42,11 @@ const users: UserDataType[] = [
   {
     id: 'employee-002',
     role: 'EMPLOYEE_BUYS_USDC',
-    password: 'client',
+    password: 'admin',
     fullName: 'Nguyễn Cao Thăng',
-    username: 'thangclient',
-    email: 'thangclient@gmail.com',
-    isChangePass: true,
+    username: 'thang@gmail.com',
+    email: 'thang@gmail.com',
+    isChangePass: false,
     url: [
       '/usdc-orders-management/buy-orders',
       '/user-profile/security',
@@ -54,6 +54,62 @@ const users: UserDataType[] = [
       '/user-profile/notification/'
     ],
     avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c'
+  },
+  {
+    id: 'employee-002',
+    role: 'EMPLOYEE_SELLS_USDC',
+    password: 'admin',
+    fullName: 'Phạm Văn Phong',
+    username: 'phongpvps36848@fpt.edu.vn',
+    email: 'phongpvps36848@fpt.edu.vn',
+    isChangePass: false,
+    url: [
+      '/usdc-orders-management/s-orders',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/'
+    ],
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c'
+  }
+
+
+  ,{
+    id: 'hr-002',
+    role: 'HR',
+    password: 'admin',
+    fullName: 'Trương Gia Hào',
+    username: 'haotgps36996@fpt.edu.vn',
+    email: 'haotgps36996@fpt.edu.vn',
+    isChangePass: false, // Sẽ điều hướng đến /employee-management
+    url: [
+      '/employee-management',
+      '/role-management',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/',
+    ],
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c',
+  },
+  // Tài khoản 3: Role EMPLOYEE, isChangePass: false
+  {
+    id: 'employee-001',
+    role: 'EMPLOYEE',
+    password: 'admin',
+    fullName: 'Bội Châu',
+    username: 'chautnbps36863@fpt.edu.vn',
+    email: 'chautnbps36863@fpt.edu.vn',
+    isChangePass: false, // Sẽ điều hướng đến /changePass
+    url: [
+      '/customer-management',
+      '/transactions-management',
+      '/savings-management',
+      '/term-management',
+      '/user-profile/security',
+      '/user-profile/account',
+      '/user-profile/notification/',
+      '/referrals',
+    ],
+    avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKQ36Zc9Lv3pSJF_DqmUo_VURNuDQkqYbcxQmywwF1-GwTj-w=s96-c',
   }
 ]
 
