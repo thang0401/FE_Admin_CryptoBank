@@ -76,7 +76,7 @@ const TermManagement: React.FC = () => {
     useEffect(() => {
         const fetchInterestRates = async () => {
             try {
-                const response = await fetch('http://localhost:8000/term/all-term');
+                const response = await fetch('https://be-crypto-depot.name.vn/term/all-term');
                 if (!response.ok) {
                     throw new Error('Failed to fetch interest rates');
                 }
@@ -139,8 +139,8 @@ const TermManagement: React.FC = () => {
             const method = selectedRate ? 'PUT' : 'POST';                           //Selected method
 
             const endpoint = selectedRate
-            ? `http://localhost:8000/term/update-term-interest-rate`              // Update endpoint
-            : 'http://localhost:8000/term/add-term';                                                 // Create endpoint
+            ? `https://be-crypto-depot.name.vn/term/update-term-interest-rate`              // Update endpoint
+            : 'https://be-crypto-depot.name.vn/term/add-term';                                                 // Create endpoint
             //
             console.log(`${method} ${endpoint}`)
             const response = await fetch(endpoint, {
@@ -176,7 +176,7 @@ const TermManagement: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         if (confirm("Are you sure you want to delete this interest rate?")) {
-            const endpoint= `http://localhost:8000/term/delete-term`
+            const endpoint= `https://be-crypto-depot.name.vn/term/delete-term`
             const response = await fetch(endpoint, {
                 method: 'DELETE',
                 headers: {
