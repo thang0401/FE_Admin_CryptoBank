@@ -64,7 +64,8 @@ const users: UserDataType[] = [
     email: 'phongpvps36848@fpt.edu.vn',
     isChangePass: false,
     url: [
-      '/usdc-orders-management/s-orders',
+
+      '/usdc-orders-management/sell-orders',
       '/user-profile/security',
       '/user-profile/account',
       '/user-profile/notification/'
