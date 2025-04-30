@@ -9,10 +9,16 @@ import { StyledCard } from "./StyledComponents"
 
 interface StatsCardsProps {
   stats: Stats
-  orderType?: "buy" | "sell"
+  orderType: "buy" | "sell"
 }
 
 const StatsCards: React.FC<StatsCardsProps> = ({ stats, orderType }) => {
+  // Xác định tiền tố cho tiêu đề dựa trên orderType
+  const typePrefix = orderType === "buy" ? "Buy" : "Sell"
+
+  // Kiểm tra volume để hiển thị giá trị phù hợp
+  const volumeValue = orderType === "buy" ? stats.totalBuyVolume : stats.totalSellVolume
+
   return (
     <Grid container spacing={3} mb={4}>
       <Grid item xs={12} sm={6} md={3}>
@@ -31,7 +37,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, orderType }) => {
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Total {orderType === "buy" ? "Buy" : orderType === "sell" ? "Sell" : ""} Orders
+                Total {typePrefix} Orders
               </Typography>
               <Typography variant="h5" fontWeight="bold">
                 {stats.totalOrders}
@@ -57,7 +63,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, orderType }) => {
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Pending Orders
+                Pending {typePrefix} Orders
               </Typography>
               <Typography variant="h5" fontWeight="bold">
                 {stats.pendingOrders}
@@ -83,10 +89,10 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, orderType }) => {
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                {orderType === "buy" ? "Buy" : "Sell"} Volume (USDC)
+                Volume (USDC)
               </Typography>
               <Typography variant="h5" fontWeight="bold">
-                {orderType === "buy" ? stats.totalBuyVolume : stats.totalSellVolume}
+                {volumeValue || "0.00"}
               </Typography>
             </Box>
           </Box>
@@ -109,7 +115,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, orderType }) => {
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Approved Orders
+                Approved {typePrefix} Orders
               </Typography>
               <Typography variant="h5" fontWeight="bold">
                 {stats.approvedOrders}
