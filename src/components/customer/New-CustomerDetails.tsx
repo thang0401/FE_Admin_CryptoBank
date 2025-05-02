@@ -56,7 +56,7 @@ interface Customer {
     lastLoginAt: string;
     idCardFrontImgUrl: string | null;
     idCardBackImgUrl: string | null;
-    idNumber: string | null;
+    idCardNumber: string | null;
 }
 
 const CustomerDetails: React.FC = () => {
@@ -103,12 +103,13 @@ const CustomerDetails: React.FC = () => {
                     province: userData.province || "",
                     nation: userData.nation || "",
                     walletAddress: userData.walletAddress || "",
-                    kycStatus: userData.kycStatus === true ? "Active" : userData.kycStatus === "Pending" ? "Pending" : "Inactive",
+                    // Map kycStatus: true -> "Active", false -> "Pending", null -> "Inactive"
+                    kycStatus: userData.kycStatus === true ? "Active" : userData.kycStatus === false ? "Pending" : "Inactive",
                     hasAcceptedTerms: userData.hasAcceptedTerms || false,
                     lastLoginAt: userData.lastLoginAt || "",
                     idCardFrontImgUrl: userData.idCardFrontImgUrl || null,
                     idCardBackImgUrl: userData.idCardBackImgUrl || null,
-                    idNumber: userData.idNumber || null,
+                    idCardNumber: userData.idCardNumber || null,
                 };
 
                 console.log("Mapped customer:", mappedCustomer);
@@ -147,13 +148,18 @@ const CustomerDetails: React.FC = () => {
         if (!customer) return;
 
         try {
-            const response = await fetch(`http://localhost:8000/api/users/${id}`, {
+            // Map kycStatus to API values: Active -> true, Inactive -> null, Pending -> false
+            const kycStatusForApi =
+                customer.kycStatus === "Active" ? true :
+                customer.kycStatus === "Inactive" ? null : false;
+
+            const response = await fetch(`https://be-crypto-depot.name.vn/api/users/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    kycStatus: customer.kycStatus === "Active" ? true : customer.kycStatus === "Pending" ? "Pending" : null,
+                    kycStatus: kycStatusForApi,
                 }),
             });
 
@@ -268,20 +274,23 @@ const CustomerDetails: React.FC = () => {
                             </Typography>
                         </Box>
                     </Box>
-                    <Box>
-                        <FormControl sx={{ minWidth: 150 }}>
-                            <InputLabel>KYC Status</InputLabel>
-                            <Select
-                                value={customer.kycStatus}
-                                label="KYC Status"
-                                onChange={handleKycStatusChange}
-                            >
-                                <MenuItem value="Active">Active</MenuItem>
-                                <MenuItem value="Pending">Pending</MenuItem>
-                                <MenuItem value="Inactive">Inactive</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Box>
+                    {/* Conditionally render FormControl based on kycStatus */}
+                    {customer.kycStatus !== "Active" && (
+                        <Box>
+                            <FormControl sx={{ minWidth: 150 }}>
+                                <InputLabel>KYC Status</InputLabel>
+                                <Select
+                                    value={customer.kycStatus}
+                                    label="KYC Status"
+                                    onChange={handleKycStatusChange}
+                                >
+                                    <MenuItem value="Active">Active</MenuItem>
+                                    <MenuItem value="Pending">Pending</MenuItem>
+                                    <MenuItem value="Inactive">Inactive</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+                    )}
                 </Box>
             </Paper>
 
@@ -407,15 +416,15 @@ const CustomerDetails: React.FC = () => {
                             </Typography>
                             <TextField
                                 fullWidth
-                                value={customer.idNumber || "Not provided"}
+                                value={customer.idCardNumber || "Not provided"}
                                 InputProps={{
                                     readOnly: true,
-                                    endAdornment: customer.idNumber && (
+                                    endAdornment: customer.idCardNumber && (
                                         <Tooltip title="Copy">
                                             <IconButton
                                                 edge="end"
                                                 size="small"
-                                                onClick={() => copyToClipboard(customer.idNumber || "")}
+                                                onClick={() => copyToClipboard(customer.idCardNumber || "")}
                                             >
                                                 <CopyIcon fontSize="small" />
                                             </IconButton>
