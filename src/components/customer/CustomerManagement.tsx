@@ -260,7 +260,7 @@ const CustomerManagement = () => {
                                     <TableCell>Name</TableCell>
                                     <TableCell>Email</TableCell>
                                     <TableCell>Phone</TableCell>
-                                    <TableCell>ID Number</TableCell>
+                                    <TableCell>Wallet</TableCell>
                                     <TableCell>Status</TableCell>
                                     <TableCell>Created Date</TableCell>
                                     <TableCell>KYC Status</TableCell>

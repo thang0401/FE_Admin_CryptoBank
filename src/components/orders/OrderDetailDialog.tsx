@@ -56,10 +56,10 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrd
       setIsLoading(true)
       setError(null)
       
-      const response = await axios.put("https://be-crypto-depot.name.vn/api/payment/transactions/confirm", {
+      const response = await axios.post("https://be-crypto-depot.name.vn/api/payment/transactions/update-status", {
         transactionId: selectedOrder.id,
-        userId: selectedOrder.userId,
-        newStatus: "d06uupiq0v87k5fikb00"  // Status code for Approve
+        // userId: selectedOrder.userId,
+        newStatus: "cvvvehbme6nnaun2s4ag"  // Status code for Approve"
       })
       
       console.log("Approval response:", response.data)
@@ -81,9 +81,9 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrd
       setIsLoading(true)
       setError(null)
       
-      const response = await axios.put("https://be-crypto-depot.name.vn/api/payment/transactions/confirm", {
+      const response = await axios.post("https://be-crypto-depot.name.vn/api/payment/transactions/update-status", {
         transactionId: selectedOrder.id,
-        userId: selectedOrder.userId,
+        // userId: selectedOrder.userId,
         newStatus: "cvvvevrme6nnaun2s4cg"  // Status code for Reject
       })
       
