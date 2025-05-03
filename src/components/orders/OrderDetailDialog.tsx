@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 import {
   Dialog,
@@ -32,6 +32,16 @@ interface OrderDetailDialogProps {
   onReject: (orderId: string) => void
 }
 
+interface BankAccount {
+  id: number
+  bankName: string
+  accountNumber: string
+  accountHolderName: string
+  createdAt: string
+  describe: string
+  updatedAt: string
+}
+
 const formatDate = (dateString: string): string => {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
@@ -46,25 +56,61 @@ const formatDate = (dateString: string): string => {
 const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrder, onClose, onApprove, onReject }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+  const [bankAccount, setBankAccount] = useState<BankAccount | null>(null)
+  const [bankAccountLoading, setBankAccountLoading] = useState<boolean>(false)
+  const [bankAccountError, setBankAccountError] = useState<string | null>(null)
 
+  useEffect(() => {
+    const fetchBankAccount = async () => {
+      if (!selectedOrder || !selectedOrder.userId) {
+        console.log("Skipping bank account fetch:", { selectedOrder, userId: selectedOrder?.userId, status: selectedOrder?.status })
+        return
+      }
+
+      try {
+        setBankAccountLoading(true);
+        setBankAccountError(null);
+        const response = await axios.get(`https://be-crypto-depot.name.vn/api/BankAccount/${selectedOrder.userId}`);
+        console.log("Bank account response:", response.data);
+
+        // Kiểm tra nếu response.data là mảng và có phần tử
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setBankAccount(response.data[0]); // Lấy phần tử đầu tiên từ mảng
+        } else {
+          setBankAccount(response.data); // Trường hợp response.data là object
+        }
+      } catch (err) {
+        console.error("Error fetching bank account:", err);
+        setBankAccountError("Failed to fetch bank account details.");
+      } finally {
+        setBankAccountLoading(false);
+      }
+    }
+
+    if (open && selectedOrder?.type === "sell") {
+      fetchBankAccount()
+    }
+
+    return () => {
+      setBankAccount(null)
+      setBankAccountError(null)
+      setBankAccountLoading(false)
+    }
+  }, [open, selectedOrder])
+  console.log("Rendering with bankAccount:", bankAccount);
   if (!selectedOrder) return null
 
   const handleApprove = async () => {
-    if (!selectedOrder) return
-    
     try {
       setIsLoading(true)
       setError(null)
-      
+
       const response = await axios.post("https://be-crypto-depot.name.vn/api/payment/transactions/update-status", {
         transactionId: selectedOrder.id,
-        // userId: selectedOrder.userId,
-        newStatus: "cvvvehbme6nnaun2s4ag"  // Status code for Approve"
+        newStatus: "cvvvehbme6nnaun2s4ag"  // Status code for Approve
       })
-      
+
       console.log("Approval response:", response.data)
-      
-      // Call the parent component's callback function
       onApprove(selectedOrder.id)
     } catch (err) {
       console.error("Error approving transaction:", err)
@@ -75,21 +121,16 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrd
   }
 
   const handleReject = async () => {
-    if (!selectedOrder) return
-    
     try {
       setIsLoading(true)
       setError(null)
-      
+
       const response = await axios.post("https://be-crypto-depot.name.vn/api/payment/transactions/update-status", {
         transactionId: selectedOrder.id,
-        // userId: selectedOrder.userId,
         newStatus: "cvvvevrme6nnaun2s4cg"  // Status code for Reject
       })
-      
+
       console.log("Rejection response:", response.data)
-      
-      // Call the parent component's callback function
       onReject(selectedOrder.id)
     } catch (err) {
       console.error("Error rejecting transaction:", err)
@@ -181,7 +222,10 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrd
             <Typography variant="body2" color="text.secondary">
               Payment Method
             </Typography>
-            <Typography variant="body1">{selectedOrder.paymentMethod}</Typography>
+            {selectedOrder.type === "sell" && (
+              <Typography variant="body1">Bank Transfer</Typography>)}
+            {selectedOrder.type === "buy" && (
+              <Typography variant="body1">VietQR Bank</Typography>)}
           </Grid>
 
           {selectedOrder.type === "buy" && selectedOrder.bankAccount && (
@@ -201,7 +245,40 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({ open, selectedOrd
               <Typography variant="body1">{selectedOrder.walletAddress}</Typography>
             </Grid>
           )}
-          
+
+          {selectedOrder.type === "sell" && (
+            <>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" color="text.secondary">
+                  Bank Name
+                </Typography>
+                {bankAccountLoading ? (
+                  <CircularProgress size={20} />
+                ) : bankAccountError ? (
+                  <Typography variant="body1" color="error">
+                    {bankAccountError}
+                  </Typography>
+                ) : (
+                  <Typography variant="body1">{bankAccount?.bankName || "N/A"}</Typography>
+                )}
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" color="text.secondary">
+                  Account Number
+                </Typography>
+                {bankAccountLoading ? (
+                  <CircularProgress size={20} />
+                ) : bankAccountError ? (
+                  <Typography variant="body1" color="error">
+                    {bankAccountError}
+                  </Typography>
+                ) : (
+                  <Typography variant="body1">{bankAccount?.accountNumber || "N/A"}</Typography>
+                )}
+              </Grid>
+            </>
+          )}
+
           {error && (
             <Grid item xs={12}>
               <Typography color="error" variant="body2">

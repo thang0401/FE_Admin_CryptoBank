@@ -34,15 +34,15 @@ interface OrdersTableProps {
 }
 
 const formatDate = (dateString: string): string => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }
-  return new Date(dateString).toLocaleDateString("en-US", options)
-}
+  const date = new Date(dateString);
+  date.setHours(date.getHours() + 7); // Add 7 hours for UTC+7
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based
+  const year = date.getFullYear().toString().slice(-2); // Get last 2 digits of year
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
 
 const USDCIcon = () => (
   <CryptoIcon>
