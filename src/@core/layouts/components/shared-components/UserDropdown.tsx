@@ -139,7 +139,7 @@ const UserDropdown = (props: Props) => {
           </Box>
         </Box>
         <Divider sx={{ mt: '0 !important' }} />
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/user-profile/profile')}>
+        {/* <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/user-profile/profile')}>
           <Box sx={styles}>
             <Icon icon='bx:user' />
             Profile
@@ -150,15 +150,15 @@ const UserDropdown = (props: Props) => {
             <Icon icon='bx:envelope' />
             Inbox
           </Box>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/apps/chat')}>
           <Box sx={styles}>
             <Icon icon='bx:message' />
             Chat
           </Box>
         </MenuItem>
-        <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/account')}>
+        {/* <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} /> */}
+        {/* <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/account')}>
           <Box sx={styles}>
             <Icon icon='bx:cog' />
             Settings
@@ -175,7 +175,7 @@ const UserDropdown = (props: Props) => {
             <Icon icon='bx:help-circle' />
             FAQ
           </Box>
-        </MenuItem>
+        </MenuItem> */}
         <Divider />
         <MenuItem
           onClick={handleLogout}

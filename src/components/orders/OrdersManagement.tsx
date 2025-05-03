@@ -76,6 +76,7 @@ interface APITransaction {
   exchangeRate: number
   transactionType: "DEPOSIT" | "WITHDRAW"
   status: string
+  createAt: string
 }
 
 const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) => {
@@ -130,10 +131,10 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
           status,
           amount: `${transaction.usdcAmount.toFixed(2)} USDC`,
           total: `${transaction.vndAmount.toLocaleString()} VND`,
-          user: `User ${transaction.userId.slice(0, 8)}`,
+          user: `${transaction.userId}`,
           userId: transaction.userId,
           email: `user${transaction.userId.slice(0, 8)}@example.com`,
-          createdAt: new Date().toISOString(),
+          createdAt: `${transaction.createAt}`,
           updatedAt: new Date().toISOString(),
           paymentMethod: type === "buy" ? "Bank Transfer" : "Crypto Wallet",
           bankAccount: type === "buy" ? "N/A" : null,
