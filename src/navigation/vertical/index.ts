@@ -59,7 +59,7 @@ const navigation = (user: UserDataType | null): VerticalNavItemsType => {
         },
         {
           title: "Employee Management",
-          icon: "bx:users",
+          icon: "bx:group",
           path: "/employee-management",
         },
         {
@@ -100,27 +100,27 @@ const navigation = (user: UserDataType | null): VerticalNavItemsType => {
         },
       ],
     },
-    {
-      icon: "bx:user",
-      title: "Profile",
-      children: [
-        {
-          title: "Security",
-          icon: "bx:lock",
-          path: "/user-profile/security",
-        },
-        {
-          title: "Saved Categories",
-          icon: "bx:bookmark",
-          path: "/user-profile/account",
-        },
-        {
-          title: "Information",
-          icon: "bx:info-circle",
-          path: "/user-profile/notification/",
-        },
-      ],
-    },
+    // {
+    //   icon: "bx:user",
+    //   title: "Profile",
+    //   children: [
+    //     {
+    //       title: "Security",
+    //       icon: "bx:lock",
+    //       path: "/user-profile/security",
+    //     },
+    //     {
+    //       title: "Saved Categories",
+    //       icon: "bx:bookmark",
+    //       path: "/user-profile/account",
+    //     },
+    //     {
+    //       title: "Information",
+    //       icon: "bx:info-circle",
+    //       path: "/user-profile/notification/",
+    //     },
+    //   ],
+    // },
   ];
 
   const filterMenu = (menuItems: VerticalNavItemsType, allowedUrls: string[]): VerticalNavItemsType => {

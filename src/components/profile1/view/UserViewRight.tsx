@@ -103,7 +103,7 @@ const UserViewRight = ({ tab, invoiceData }: Props) => {
             </Box>
           }
         />
-
+{/* 
         <Tab
           value='account'
           label={
@@ -131,7 +131,7 @@ const UserViewRight = ({ tab, invoiceData }: Props) => {
               {!hideText && 'Cài đặt'}
             </Box>
           }
-        />
+        /> */}
         {/* <Tab
           value='connection'
           label={
