@@ -488,13 +488,13 @@ const CustomerDetails: React.FC = () => {
                   sx={{ width: "32%" }}
                 />
               </Box>
-              <TextField
+              {/* <TextField
                 label="Country"
                 value={customer.nation}
                 InputProps={{ readOnly: true }}
                 size="small"
                 sx={{ width: "48%" }}
-              />
+              /> */}
             </Stack>
           </Paper>
         </Grid>
