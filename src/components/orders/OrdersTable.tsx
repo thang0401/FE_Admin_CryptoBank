@@ -20,6 +20,7 @@ import type { Order } from "src/types/orders-management/order"
 import StatusChip from "./StatusChip"
 import { CryptoIcon, StyledTableContainer } from "./StyledComponents"
 import { useEffect, useState } from "react"
+import { ArrowForward } from "@mui/icons-material"
 
 interface OrdersTableProps {
   loading: boolean
