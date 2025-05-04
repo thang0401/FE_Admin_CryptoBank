@@ -117,10 +117,10 @@ export default function ChangePass() {
     }
 
     try {
-      const response = await axios.put('https://be-crypto-depot.name.vn/api/employees/changePassword', {
-        EmployeeId: employeeId,
+      const response = await axios.put('https://be-crypto-depot.name.vn/api/employee/auth/changePassword', {
+        employeeId: employeeId,
         newPassword: values.newPassword,
-        isChangePass: true,
+        changePass: true,
       }, {
         headers: {
           'Content-Type': 'application/json',

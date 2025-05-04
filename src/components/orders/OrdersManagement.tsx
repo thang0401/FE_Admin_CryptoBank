@@ -33,6 +33,8 @@ import {
   Select,
   MenuItem,
   useTheme,
+  Alert,
+  AlertTitle,
 } from "@mui/material"
 import { styled } from "@mui/material/styles"
 import Head from "next/head"
@@ -52,6 +54,7 @@ import OrdersTable from "./OrdersTable"
 import OrderDetailDialog from "./OrderDetailDialog"
 import { Order, Stats } from "src/types/orders-management/order"
 import { StyledCard } from "./StyledComponents"
+import CloseIcon from '@mui/icons-material/Close';
 
 const CryptoIcon = styled("div")(({ theme }) => ({
   width: "24px",
@@ -368,6 +371,30 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
               {orderType === "buy" ? "Buy Orders" : "Sell Orders"}
             </Typography>
+            {orderType === "sell" && (
+              <Alert 
+                severity="error"
+                variant="filled"
+                sx={{
+                  mb: 3,
+                  '& .MuiAlert-icon': {
+                    fontSize: '2rem'
+                  }
+                }}
+                action={
+                  <IconButton
+                    aria-label="close"
+                    color="inherit"
+                    size="small"
+                  >
+                  </IconButton>
+                }
+              >
+                <Typography variant="body1" sx={{ mt: 0.5, color: "white" }}>
+                  Cố tình chuyển tiền sang tài khoản khác không phải của khách hàng bạn sẽ bị quy vào tội chiếm đoạn tài sản của công ty. Vui lòng thực hiện đúng trách nhiệm!
+                </Typography>
+              </Alert>
+            )}
             <Typography variant="body1" color="text.secondary">
               Manage and process customer {orderType} orders
             </Typography>

@@ -255,19 +255,19 @@ const LoginPage = () => {
                 sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.875rem', color: 'text.secondary' } }}
                 control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
               />
-              <LinkStyled href='/forgot-password'>Forgot Password?</LinkStyled>
+              {/* <LinkStyled href='/forgot-password'>Forgot Password?</LinkStyled> */}
             </Box>
             <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 4 }}>
               Sign in
             </Button>
-            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {/* <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Typography variant='body2' sx={{ mr: 2 }}>
                 New on our platform?
               </Typography>
               <Typography>
                 <LinkStyled href='/register'>Create an account</LinkStyled>
               </Typography>
-            </Box>
+            </Box> */}
             {/* <Divider sx={{ my: `${theme.spacing(6)} !important` }}>or</Divider> */}
             {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <IconButton
