@@ -33,6 +33,8 @@ import {
   Select,
   MenuItem,
   useTheme,
+  Alert,
+  AlertTitle,
 } from "@mui/material"
 import { styled } from "@mui/material/styles"
 import Head from "next/head"
@@ -52,6 +54,7 @@ import OrdersTable from "./OrdersTable"
 import OrderDetailDialog from "./OrderDetailDialog"
 import { Order, Stats } from "src/types/orders-management/order"
 import { StyledCard } from "./StyledComponents"
+import CloseIcon from '@mui/icons-material/Close';
 
 const CryptoIcon = styled("div")(({ theme }) => ({
   width: "24px",
@@ -64,7 +67,7 @@ const CryptoIcon = styled("div")(({ theme }) => ({
 }))
 
 interface OrdersManagementProps {
-  orderType?: "buy" | "sell"
+  orderType: "buy" | "sell"
 }
 
 interface APITransaction {
@@ -76,6 +79,7 @@ interface APITransaction {
   exchangeRate: number
   transactionType: "DEPOSIT" | "WITHDRAW"
   status: string
+  createAt: string
 }
 
 const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) => {
@@ -105,7 +109,6 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
   const mapTransactionsToOrders = (transactions: APITransaction[]): Order[] => {
     return transactions
       .filter((transaction) => 
-        !orderType || 
         (orderType === "buy" && transaction.transactionType === "DEPOSIT") ||
         (orderType === "sell" && transaction.transactionType === "WITHDRAW")
       )
@@ -131,10 +134,10 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
           status,
           amount: `${transaction.usdcAmount.toFixed(2)} USDC`,
           total: `${transaction.vndAmount.toLocaleString()} VND`,
-          user: `User ${transaction.userId.slice(0, 8)}`,
+          user: `${transaction.userId}`,
           userId: transaction.userId,
           email: `user${transaction.userId.slice(0, 8)}@example.com`,
-          createdAt: new Date().toISOString(),
+          createdAt: `${transaction.createAt}`,
           updatedAt: new Date().toISOString(),
           paymentMethod: type === "buy" ? "Bank Transfer" : "Crypto Wallet",
           bankAccount: type === "buy" ? "N/A" : null,
@@ -174,28 +177,24 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
 
       setOrders(mappedOrders)
 
-      const pendingOrdersCount = pendingOrders.length
-      const approvedOrders = mappedOrders.filter((order) => order.status === "approved").length
-      const rejectedOrders = mappedOrders.filter((order) => order.status === "rejected").length
+      const filteredPendingOrders = pendingOrders.filter(order => order.type === orderType)
+      const filteredOrders = mappedOrders.filter(order => order.type === orderType)
 
-      const buyOrders = mappedOrders.filter((order) => order.type === "buy")
-      const sellOrders = mappedOrders.filter((order) => order.type === "sell")
+      const pendingOrdersCount = filteredPendingOrders.length
+      const approvedOrders = filteredOrders.filter((order) => order.status === "approved").length
+      const rejectedOrders = filteredOrders.filter((order) => order.status === "rejected").length
 
-      const totalBuyVolume = buyOrders.reduce((sum, order) => {
-        return sum + Number.parseFloat(order.amount.split(" ")[0])
-      }, 0)
-
-      const totalSellVolume = sellOrders.reduce((sum, order) => {
+      const totalVolume = filteredOrders.reduce((sum, order) => {
         return sum + Number.parseFloat(order.amount.split(" ")[0])
       }, 0)
 
       setStats({
-        totalOrders: mappedOrders.length + pendingOrdersCount,
+        totalOrders: filteredOrders.length + pendingOrdersCount,
         pendingOrders: pendingOrdersCount,
         approvedOrders,
         rejectedOrders,
-        totalBuyVolume: totalBuyVolume.toFixed(2),
-        totalSellVolume: totalSellVolume.toFixed(2),
+        totalBuyVolume: orderType === "buy" ? totalVolume.toFixed(2) : "0",
+        totalSellVolume: orderType === "sell" ? totalVolume.toFixed(2) : "0",
       })
     } catch (error) {
       console.error("Error fetching orders:", error)
@@ -210,30 +209,26 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
   }, [orderType])
 
   useEffect(() => {
-    const pendingOrdersCount = pendingOrders.length
-    const approvedOrders = orders.filter((order) => order.status === "approved").length
-    const rejectedOrders = orders.filter((order) => order.status === "rejected").length
+    const filteredPendingOrders = pendingOrders.filter(order => order.type === orderType)
+    const filteredOrders = orders.filter(order => order.type === orderType)
 
-    const buyOrders = orders.filter((order) => order.type === "buy")
-    const sellOrders = orders.filter((order) => order.type === "sell")
+    const pendingOrdersCount = filteredPendingOrders.length
+    const approvedOrders = filteredOrders.filter((order) => order.status === "approved").length
+    const rejectedOrders = filteredOrders.filter((order) => order.status === "rejected").length
 
-    const totalBuyVolume = buyOrders.reduce((sum, order) => {
-      return sum + Number.parseFloat(order.amount.split(" ")[0])
-    }, 0)
-
-    const totalSellVolume = sellOrders.reduce((sum, order) => {
+    const totalVolume = filteredOrders.reduce((sum, order) => {
       return sum + Number.parseFloat(order.amount.split(" ")[0])
     }, 0)
 
     setStats({
-      totalOrders: orders.length + pendingOrdersCount,
+      totalOrders: filteredOrders.length + pendingOrdersCount,
       pendingOrders: pendingOrdersCount,
       approvedOrders,
       rejectedOrders,
-      totalBuyVolume: totalBuyVolume.toFixed(2),
-      totalSellVolume: totalSellVolume.toFixed(2),
+      totalBuyVolume: orderType === "buy" ? totalVolume.toFixed(2) : "0",
+      totalSellVolume: orderType === "sell" ? totalVolume.toFixed(2) : "0",
     })
-  }, [pendingOrders])
+  }, [pendingOrders, orders, orderType])
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage)
@@ -267,7 +262,7 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
 
     setStats({
       ...stats,
-      pendingOrders: updatedPendingOrders.length,
+      pendingOrders: updatedPendingOrders.filter(order => order.type === orderType).length,
       approvedOrders: stats.approvedOrders + 1,
     })
   }
@@ -286,7 +281,7 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
 
     setStats({
       ...stats,
-      pendingOrders: updatedPendingOrders.length,
+      pendingOrders: updatedPendingOrders.filter(order => order.type === orderType).length,
       rejectedOrders: stats.rejectedOrders + 1,
     })
   }
@@ -374,14 +369,38 @@ const OrdersManagementPage: React.FC<OrdersManagementProps> = ({ orderType }) =>
         <Container maxWidth="xl">
           <Box mb={4}>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
-              {orderType === "buy" ? "Buy Orders" : orderType === "sell" ? "Sell Orders" : "Order Management"}
+              {orderType === "buy" ? "Buy Orders" : "Sell Orders"}
             </Typography>
+            {orderType === "sell" && (
+              <Alert 
+                severity="error"
+                variant="filled"
+                sx={{
+                  mb: 3,
+                  '& .MuiAlert-icon': {
+                    fontSize: '2rem'
+                  }
+                }}
+                action={
+                  <IconButton
+                    aria-label="close"
+                    color="inherit"
+                    size="small"
+                  >
+                  </IconButton>
+                }
+              >
+                <Typography variant="body1" sx={{ mt: 0.5, color: "white" }}>
+                  Cố tình chuyển tiền sang tài khoản khác không phải của khách hàng bạn sẽ bị quy vào tội chiếm đoạn tài sản của công ty. Vui lòng thực hiện đúng trách nhiệm!
+                </Typography>
+              </Alert>
+            )}
             <Typography variant="body1" color="text.secondary">
-              Manage and process customer {orderType ? `${orderType} orders` : "buy/sell orders"}
+              Manage and process customer {orderType} orders
             </Typography>
           </Box>
 
-          <StatsCards stats={stats} />
+          <StatsCards stats={stats} orderType={orderType} />
 
           <StyledCard>
             <FilterControls

@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
     Box,
     Paper,
@@ -40,8 +43,8 @@ interface Customer {
     ranking_id: string;
     status_id: string;
     created_date: string;
-    is_activated: boolean;
-    kyc_status: string;
+    kyc_status: boolean;
+    status: string | null;
     type_siging_in: string;
     modified_by: string;
     modified_date: string;
@@ -55,9 +58,17 @@ const rankingOptions = [
 ];
 
 const statusOptions = [
-    { id: 'S001', label: 'Active' },
-    { id: 'S002', label: 'Inactive' },
-    { id: 'S003', label: 'Suspended' }
+    { id: 'cvvvhgjme6nnaun2s4pg', label: 'Active' },
+    { id: 'cvvvhjbme6nnaun2s4q0', label: 'Blocked' },
+    { id: 'cvvvhlbme6nnaun2s4qg', label: 'Inactive' },
+    { id: 'cvvvhqbme6nnaun2s4rg', label: 'Suspended' }
+];
+
+const kycStatusOptions = [
+    { value: '', label: 'All' },
+    { value: 'Approved', label: 'Approved' },
+    { value: 'Pending', label: 'Pending' }
+    // { value: 'Rejected', label: 'Rejected' }
 ];
 
 const CustomerManagement = () => {
@@ -69,49 +80,49 @@ const CustomerManagement = () => {
     const [loading, setLoading] = useState<boolean>(true);
 
     const [filters, setFilters] = useState<{
-        user_id: string;
-        ranking_id: string;
+        email: string;
         phone: string;
         name: string;
-        id_card: string;
+        status: string;
+        kycStatus: string;
     }>({
-        user_id: '',
-        ranking_id: '',
+        email: '',
         phone: '',
         name: '',
-        id_card: ''
+        status: '',
+        kycStatus: ''
     });
 
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
                 setLoading(true);
-                const request = new URLSearchParams({ page: (page + 1).toString(), size: rowsPerPage.toString() }).toString();
-                const response = await fetch(`https://be-crypto-depot.name.vn/api/users?${request}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
+                const params = {
+                    page: page + 1,
+                    size: rowsPerPage,
+                    ...(filters.email && { email: filters.email }),
+                    ...(filters.phone && { phone: filters.phone }),
+                    ...(filters.name && { name: filters.name }),
+                    ...(filters.status && { status: filters.status })
+                };
+
+                const response = await axios.get('https://be-crypto-depot.name.vn/api/users', {
+                    params
                 });
 
-                if (!response.ok) { 
-                    throw new Error('Network response was not ok');
-                }
-
-                const data: { content: any[]; page: any } = await response.json();
+                const data: { content: any[]; page: any } = response.data;
                 const formattedCustomers: Customer[] = data.content.map((customer: any) => ({
                     id: customer.id || `USR${Math.random().toString(36).substr(2, 9)}`,
-                    // id: customer.id || ``,
                     first_name: customer.firstName || '',
                     last_name: customer.lastName || '',
                     email: customer.email || '',
                     phone_num: customer.phoneNumber || '',
                     id_number: customer.walletAddress || '',
-                    ranking_id: 'R001',
-                    status_id: customer.hasAcceptedTerms ? 'S001' : 'S002',
+                    ranking_id: 'R001', // Hardcode vì API không trả về
+                    status_id: customer.status ? statusOptions.find(s => s.label === customer.status)?.id || '' : '',
                     created_date: customer.createdAt || new Date().toISOString(),
-                    is_activated: customer.kycStatus || false,
-                    kyc_status: customer.kycStatus ? 'verified' : 'pending',
+                    kyc_status: customer.kycStatus ?? false,
+                    status: customer.status || null,
                     type_siging_in: 'email',
                     modified_by: 'system',
                     modified_date: customer.lastLoginAt || new Date().toISOString()
@@ -127,7 +138,7 @@ const CustomerManagement = () => {
         };
 
         fetchCustomers();
-    }, [page, rowsPerPage]);
+    }, [page, rowsPerPage, filters.email, filters.phone, filters.name, filters.status]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -143,39 +154,82 @@ const CustomerManagement = () => {
             ...prev,
             [field]: value
         }));
+        setPage(0); // Reset về trang đầu khi thay đổi filter
     };
 
     const resetFilters = () => {
         setFilters({
-            user_id: '',
-            ranking_id: '',
+            email: '',
             phone: '',
             name: '',
-            id_card: ''
+            status: '',
+            kycStatus: ''
         });
-    };
-
-    const handleEditClick = (customer: Customer) => {
-        // Logic cho edit nếu cần
+        setPage(0);
     };
 
     const exportToExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(customers);
+        const exportData = filteredCustomers.map(customer => ({
+            ID: customer.id,
+            Name: `${customer.first_name} ${customer.last_name}`,
+            Email: customer.email,
+            Phone: customer.phone_num,
+            Wallet: customer.id_number,
+            Status: getStatusLabel(customer),
+            'KYC Status': getKYCStatusLabel(customer),
+            'Created Date': new Date(customer.created_date).toLocaleDateString(),
+            'Sign-in Type': customer.type_siging_in
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Customers");
         XLSX.writeFile(workbook, "customers.xlsx");
     };
 
+    const getKYCStatusLabel = (customer: Customer) => {
+        if (customer.kyc_status) return "Approved";
+        if (!customer.kyc_status && customer.status === "Rejected") return "Rejected";
+        return "Pending";
+    };
+
+    const getStatusLabel = (customer: Customer) => {
+        if (!customer.kyc_status) return "N/A";
+        return customer.status || "Active";
+    };
+
+    const getKYCStatusColor = (customer: Customer) => {
+        if (customer.kyc_status) return "success";
+        if (!customer.kyc_status && customer.status === "Rejected") return "error";
+        return "warning";
+    };
+
+    const getStatusColor = (customer: Customer) => {
+        if (!customer.kyc_status) return "default";
+        switch (customer.status) {
+            case "Active":
+                return "success";
+            case "Blocked":
+            case "Suspended":
+                return "error";
+            case "Inactive":
+                return "default";
+            default:
+                return "success"; // Mặc định Active
+        }
+    };
+
     const filteredCustomers: Customer[] = customers.filter((customer: Customer) => {
-        const matchUserId = customer.id.toLowerCase().includes(filters.user_id.toLowerCase());
-        const matchRanking = !filters.ranking_id || customer.ranking_id === filters.ranking_id;
+        const matchEmail = customer.email.toLowerCase().includes(filters.email.toLowerCase());
         const matchPhone = customer.phone_num.includes(filters.phone);
         const matchName = (customer.first_name + ' ' + customer.last_name)
             .toLowerCase()
             .includes(filters.name.toLowerCase());
-        const matchIdCard = customer.id_number.includes(filters.id_card);
-
-        return matchUserId && matchRanking && matchPhone && matchName && matchIdCard;
+        const matchKycStatus = !filters.kycStatus ||
+            (filters.kycStatus === "Approved" && customer.kyc_status) ||
+            (filters.kycStatus === "Pending" && !customer.kyc_status);
+            // (filters.kycStatus === "Rejected" && !customer.kyc_status && customer.status === "Rejected");
+    
+        return matchEmail && matchPhone && matchName && matchKycStatus;
     });
 
     const handleAccountSelect = (id: string) => {
@@ -206,10 +260,10 @@ const CustomerManagement = () => {
                     <Paper sx={{ p: 2, mb: 3 }}>
                         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                             <TextField
-                                label="User ID"
+                                label="Email"
                                 size="small"
-                                value={filters.user_id}
-                                onChange={(e) => handleFilterChange('user_id', e.target.value)}
+                                value={filters.email}
+                                onChange={(e) => handleFilterChange('email', e.target.value)}
                             />
                             <TextField
                                 label="Name"
@@ -223,22 +277,28 @@ const CustomerManagement = () => {
                                 value={filters.phone}
                                 onChange={(e) => handleFilterChange('phone', e.target.value)}
                             />
-                                {/* <TextField
-                                    label="ID Card"
-                                    size="small"
-                                    value={filters.id_card}
-                                    onChange={(e) => handleFilterChange('id_card', e.target.value)}
-                                /> */}
                             <FormControl size="small" sx={{ minWidth: 120 }}>
-                                <InputLabel>Ranking</InputLabel>
+                                <InputLabel>Status</InputLabel>
                                 <Select
-                                    value={filters.ranking_id}
-                                    label="Ranking"
-                                    onChange={(e) => handleFilterChange('ranking_id', e.target.value as string)}
+                                    value={filters.status}
+                                    label="Status"
+                                    onChange={(e) => handleFilterChange('status', e.target.value as string)}
                                 >
                                     <MenuItem value="">All</MenuItem>
-                                    {rankingOptions.map(rank => (
-                                        <MenuItem key={rank.id} value={rank.id}>{rank.label}</MenuItem>
+                                    {statusOptions.map(status => (
+                                        <MenuItem key={status.id} value={status.id}>{status.label}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl size="small" sx={{ minWidth: 120 }}>
+                                <InputLabel>KYC Status</InputLabel>
+                                <Select
+                                    value={filters.kycStatus}
+                                    label="KYC Status"
+                                    onChange={(e) => handleFilterChange('kycStatus', e.target.value as string)}
+                                >
+                                    {kycStatusOptions.map(option => (
+                                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                     ))}
                                 </Select>
                             </FormControl>
@@ -260,7 +320,7 @@ const CustomerManagement = () => {
                                     <TableCell>Name</TableCell>
                                     <TableCell>Email</TableCell>
                                     <TableCell>Phone</TableCell>
-                                    <TableCell>ID Number</TableCell>
+                                    <TableCell>Wallet</TableCell>
                                     <TableCell>Status</TableCell>
                                     <TableCell>Created Date</TableCell>
                                     <TableCell>KYC Status</TableCell>
@@ -279,16 +339,16 @@ const CustomerManagement = () => {
                                             <TableCell>{customer.id_number}</TableCell>
                                             <TableCell>
                                                 <Chip
-                                                    label={customer.is_activated ? 'Active' : 'Inactive'}
-                                                    color={customer.is_activated ? 'success' : 'default'}
+                                                    label={getStatusLabel(customer)}
+                                                    color={getStatusColor(customer)}
                                                     size="small"
                                                 />
                                             </TableCell>
                                             <TableCell>{new Date(customer.created_date).toLocaleDateString()}</TableCell>
                                             <TableCell>
                                                 <Chip
-                                                    label={customer.kyc_status}
-                                                    color={customer.kyc_status === 'verified' ? 'success' : 'warning'}
+                                                    label={getKYCStatusLabel(customer)}
+                                                    color={getKYCStatusColor(customer)}
                                                     size="small"
                                                 />
                                             </TableCell>
@@ -305,7 +365,7 @@ const CustomerManagement = () => {
                             </TableBody>
                         </Table>
                         <TablePagination
-                            rowsPerPageOptions={[5, 10, 25]}
+                            rowsPerPageOptions={[5, 10, 20]}
                             component="div"
                             count={totalRows}
                             rowsPerPage={rowsPerPage}

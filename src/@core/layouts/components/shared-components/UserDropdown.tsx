@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography'
 import Icon from 'src/@core/components/icon'
 
 // ** Context
- import { useAuth } from 'src/hooks/useAuth'
+import { useAuth } from 'src/hooks/useAuth'
 
 // ** Type Imports
 import { Settings } from 'src/@core/context/settingsContext'
@@ -42,14 +42,18 @@ const UserDropdown = (props: Props) => {
 
   // ** States
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-
+ 
   // ** Hooks
   const router = useRouter()
-   const { logout } = useAuth()
+  const { logout } = useAuth()
 
   // ** Vars
   const { direction } = settings
 
+  const userData = JSON.parse(localStorage.getItem('userData') || "{}")
+  const id = userData.id || ""
+  const role = userData.role || ""
+  
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
   }
@@ -79,7 +83,7 @@ const UserDropdown = (props: Props) => {
     logout()
     handleDropdownClose()
   }
-  console.log()
+  console.log()  
 
   return (
     <Fragment>
@@ -96,8 +100,8 @@ const UserDropdown = (props: Props) => {
         <Avatar
           // alt={JSON.parse(localStorage.getItem('userData') || '').fullName}
           src={
-           // JSON.parse(localStorage.getItem('userData') || '').avatarUrl ??
-             '/images/avatars/1.png'}
+            JSON.parse(localStorage.getItem('userData') || '').avatar ??
+            'https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Teemo_League_of_Legends.webp/299px-Teemo_League_of_Legends.webp.png'}
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40 }}
         />
@@ -110,7 +114,7 @@ const UserDropdown = (props: Props) => {
         anchorOrigin={{ vertical: 'bottom', horizontal: direction === 'ltr' ? 'right' : 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: direction === 'ltr' ? 'right' : 'left' }}
       >
-        <Box sx={{ py: 2, px: 4 }}>
+        <Box sx={{ py: 2, px: 1}}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Badge
               overlap='circular'
@@ -123,23 +127,23 @@ const UserDropdown = (props: Props) => {
               <Avatar
                 // alt={JSON.parse(localStorage.getItem('userData') || '').fullName}
                 src={
-                  //JSON.parse(localStorage.getItem('userData') || '').avatarUrl ??
-                  '/images/avatars/1.png'}
+                  JSON.parse(localStorage.getItem('userData') || '').avatar ??
+                  'https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Teemo_League_of_Legends.webp/299px-Teemo_League_of_Legends.webp.png'}
                 sx={{ width: '2.5rem', height: '2.5rem' }}
               />
             </Badge>
             <Box sx={{ ml: 3, display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
               <Typography sx={{ fontWeight: 500 }}>
-                {/* {JSON.parse(localStorage.getItem('userData') || '').fullName} */}
+                {JSON.parse(localStorage.getItem('userData') || '').fullName}
               </Typography>
               <Typography variant='body2' sx={{ color: 'text.secondary' }}>
-                Admin
+                {JSON.parse(localStorage.getItem('userData') || '').role ?? ''}
               </Typography>
             </Box>
           </Box>
         </Box>
         <Divider sx={{ mt: '0 !important' }} />
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/user-profile/profile')}>
+        {/* <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/user-profile/profile')}>
           <Box sx={styles}>
             <Icon icon='bx:user' />
             Profile
@@ -150,15 +154,15 @@ const UserDropdown = (props: Props) => {
             <Icon icon='bx:envelope' />
             Inbox
           </Box>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/apps/chat')}>
           <Box sx={styles}>
             <Icon icon='bx:message' />
             Chat
           </Box>
         </MenuItem>
-        <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/account')}>
+        {/* <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} /> */}
+        {/* <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/account')}>
           <Box sx={styles}>
             <Icon icon='bx:cog' />
             Settings
@@ -175,7 +179,7 @@ const UserDropdown = (props: Props) => {
             <Icon icon='bx:help-circle' />
             FAQ
           </Box>
-        </MenuItem>
+        </MenuItem> */}
         <Divider />
         <MenuItem
           onClick={handleLogout}

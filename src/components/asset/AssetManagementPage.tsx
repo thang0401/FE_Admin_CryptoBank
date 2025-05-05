@@ -6,11 +6,11 @@ import { Box, Typography, Tabs, Tab, Paper, useTheme } from "@mui/material"
 import { AccountBalance, History, AdminPanelSettings } from "@mui/icons-material"
 
 import AssetsOverview from "./AssetsOverview"
-import TransactionsTab from "./TransactionsTab"
+// import TransactionsTab from "./TransactionsTab"
 
 import AdminActivityLog from "./AdminActivityLog"
-import ReportsStatistics from "./ReportsStatistics"
-import SettingsTab from "./SettingsTab"
+// import ReportsStatistics from "./ReportsStatistics"
+// import SettingsTab from "./SettingsTab"
 import type { AssetData, TransactionData, AlertData } from "src/types/asset-management/type"
 
 // Mock data
@@ -51,19 +51,7 @@ const mockAssets: AssetData[] = [
     dailyLimit: 10,
     weeklyLimit: 50,
     monthlyLimit: 100,
-  },
-  {
-    id: 4,
-    name: "LINK",
-    type: "crypto",
-    balance: 1200,
-    address: "0x5432...7890",
-    transactions: 325,
-    status: "active",
-    dailyLimit: 500,
-    weeklyLimit: 2000,
-    monthlyLimit: 5000,
-  },
+  }
 ]
 
 const mockTransactions: TransactionData[] = [
@@ -222,7 +210,7 @@ const AssetManagementPage: React.FC = () => {
         )}
 
         {/* Transactions Tab */}
-        {tabValue === 1 && <TransactionsTab transactions={transactions} />}
+        {/* {tabValue === 1 && <TransactionsTab transactions={transactions} />} */}
 
         {/* Security Tab */}
         {/* {tabValue === 2 && <SecuritySettings />} */}
@@ -231,10 +219,10 @@ const AssetManagementPage: React.FC = () => {
         {tabValue === 2 && <AdminActivityLog adminLogs={adminLogs} />}
 
         {/* Reports & Statistics Tab */}
-        {tabValue === 3 && <ReportsStatistics assets={assets} transactions={transactions} />}
+        {/* {tabValue === 3 && <ReportsStatistics assets={assets} transactions={transactions} />} */}
 
         {/* Settings Tab */}
-        {tabValue === 4 && <SettingsTab />}
+        {/* {tabValue === 4 && <SettingsTab />} */}
       </Paper>
     </Box>
   )

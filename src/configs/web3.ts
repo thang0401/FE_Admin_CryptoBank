@@ -1,7 +1,7 @@
 import {Web3} from "web3";
 
 // Thông tin contract
-const CONTRACT_ADDRESS = "0xb215a9b626d428e342154dd5be7dacbe6d757734"; // Thay bằng địa chỉ contract của bạn
+const CONTRACT_ADDRESS = "0xb215a9b626d428e342154dd5be7dacbe6d757734";
 
 const CONTRACT_ABI = [
 	{
