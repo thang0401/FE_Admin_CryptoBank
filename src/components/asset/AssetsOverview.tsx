@@ -49,7 +49,7 @@ import {
   Notifications,
 } from "@mui/icons-material"
 import type { AssetData, TransactionData, AlertData } from "src/types/asset-management/type"
-import TwoFactorVerification from "./TwoFactorVerification"
+// import TwoFactorVerification from "./TwoFactorVerification"
 
 interface AssetsOverviewProps {
   assets: AssetData[]
@@ -247,13 +247,16 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
   const formatCurrency = (value: number, currency: string): string => {
     if (currency === "USDC") {
       return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-    } else if (currency === "VND") {
-      return `₫${value.toLocaleString("vi-VN")}`
-    } else if (currency === "ETH") {
-      return `${value.toLocaleString("en-US", { minimumFractionDigits: 6, maximumFractionDigits: 6 })} ETH`
-    } else if (currency === "LINK") {
-      return `${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} LINK`
     }
+    // else if (currency === "VND") {
+    //   return `₫${value.toLocaleString("vi-VN")}`
+    // }
+    else if (currency === "ETH") {
+      return `${value.toLocaleString("en-US", { minimumFractionDigits: 6, maximumFractionDigits: 6 })} ETH`
+    }
+    //  else if (currency === "LINK") {
+    //   return `${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} LINK`
+    // }
     return value.toString()
   }
 
@@ -417,8 +420,8 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
             sx={{ mb: 2 }}
           >
             <Tab label="All Assets" />
-            <Tab label="Fiat Currency" />
-            <Tab label="Cryptocurrency" />
+            {/* <Tab label="Fiat Currency" />
+            <Tab label="Cryptocurrency" /> */}
           </Tabs>
 
           <TableContainer>
@@ -704,11 +707,11 @@ const AssetsOverview: React.FC<AssetsOverviewProps> = ({
       </Dialog>
 
       {/* 2FA Verification Dialog */}
-      <TwoFactorVerification
+      {/* <TwoFactorVerification
         open={showTwoFactorDialog}
         onSuccess={handleTwoFactorSuccess}
         onCancel={handleTwoFactorCancel}
-      />
+      /> */}
     </>
   )
 }
