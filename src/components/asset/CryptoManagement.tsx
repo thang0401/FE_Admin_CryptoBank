@@ -147,7 +147,7 @@ const AssetManagementPage: React.FC = () => {
 
   const handleTransfer = (): void => {
     if (!selectedAsset) return;
-    
+
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
@@ -162,16 +162,16 @@ const AssetManagementPage: React.FC = () => {
         status: 'pending',
         txHash: `0x${Math.random().toString(36).substring(2, 10)}...${Math.random().toString(36).substring(2, 6)}`,
       };
-      
+
       setTransactions([newTransaction, ...transactions]);
-      
+
       // Update asset balance (in a real app this would happen after confirmation)
-      setAssets(assets.map(asset => 
-        asset.id === selectedAsset.id 
-          ? { ...asset, balance: asset.balance - parseFloat(transferAmount) } 
+      setAssets(assets.map(asset =>
+        asset.id === selectedAsset.id
+          ? { ...asset, balance: asset.balance - parseFloat(transferAmount) }
           : asset
       ));
-      
+
       setIsLoading(false);
       handleTransferClose();
     }, 1500);
@@ -179,14 +179,14 @@ const AssetManagementPage: React.FC = () => {
 
   const handleAdjust = (): void => {
     if (!selectedAsset) return;
-    
+
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
-      const adjustedAmount = adjustType === 'add' 
-        ? parseFloat(adjustAmount) 
+      const adjustedAmount = adjustType === 'add'
+        ? parseFloat(adjustAmount)
         : -parseFloat(adjustAmount);
-      
+
       // Add transaction
       const newTransaction: TransactionData = {
         id: transactions.length + 1,
@@ -198,16 +198,16 @@ const AssetManagementPage: React.FC = () => {
         status: 'completed',
         txHash: `0x${Math.random().toString(36).substring(2, 10)}...${Math.random().toString(36).substring(2, 6)}`,
       };
-      
+
       setTransactions([newTransaction, ...transactions]);
-      
+
       // Update asset balance
-      setAssets(assets.map(asset => 
-        asset.id === selectedAsset.id 
-          ? { ...asset, balance: asset.balance + adjustedAmount } 
+      setAssets(assets.map(asset =>
+        asset.id === selectedAsset.id
+          ? { ...asset, balance: asset.balance + adjustedAmount }
           : asset
       ));
-      
+
       setIsLoading(false);
       handleAdjustClose();
     }, 1500);
@@ -239,7 +239,7 @@ const AssetManagementPage: React.FC = () => {
     VND: theme.palette.mode === 'dark' ? '#4a3b52' : '#f5f5f5',   // Xám đen tinh tế
     ETH: theme.palette.mode === 'dark' ? '#2d3142' : '#e3f2fd',   // Xám xanh thanh lịch
   };
-  
+
   const chipBackgroundColors = {
     deposit: theme.palette.mode === 'dark' ? '#0d3b2c' : '#e8f5e9',   // Xanh lục đậm
     withdrawal: theme.palette.mode === 'dark' ? '#542233' : '#fbe9e7', // Đỏ mận
@@ -254,7 +254,7 @@ const AssetManagementPage: React.FC = () => {
       <Typography variant="subtitle1" color="text.secondary" gutterBottom>
         Admin Dashboard
       </Typography>
-      
+
       <Grid container spacing={3} sx={{ mt: 1 }}>
         {/* Quick Stats Cards */}
         <Grid item xs={12} md={4}>
@@ -272,7 +272,7 @@ const AssetManagementPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} md={4}>
           <Card sx={{ height: '100%', backgroundColor: cardBackgroundColors.VND, boxShadow: 3 }}>
             <CardContent>
@@ -288,7 +288,7 @@ const AssetManagementPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} md={4}>
           <Card sx={{ height: '100%', backgroundColor: cardBackgroundColors.ETH, boxShadow: 3 }}>
             <CardContent>
@@ -308,9 +308,9 @@ const AssetManagementPage: React.FC = () => {
 
       {/* Main content tabs */}
       <Paper sx={{ width: '100%', mt: 3, boxShadow: 3 }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange} 
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
           textColor="primary"
           indicatorColor="primary"
           sx={{ borderBottom: 1, borderColor: 'divider' }}
@@ -325,23 +325,23 @@ const AssetManagementPage: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
               <Typography variant="h6">Assets Overview</Typography>
               <Box>
-                <Button 
-                  variant="outlined" 
-                  startIcon={<Refresh />} 
+                <Button
+                  variant="outlined"
+                  startIcon={<Refresh />}
                   sx={{ mr: 1 }}
                 >
                   Refresh
                 </Button>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
+                <Button
+                  variant="contained"
+                  color="primary"
                   startIcon={<Speed />}
                 >
                   Gas Settings
                 </Button>
               </Box>
             </Box>
-            
+
             <TableContainer>
               <Table sx={{ minWidth: 650 }}>
                 <TableHead>
@@ -356,14 +356,14 @@ const AssetManagementPage: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {assets.map((asset) => (
-                    <TableRow 
+                    <TableRow
                       key={asset.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Wallet sx={{ mr: 1, color: 
-                            asset.name === 'USDC' ? '#2e7d32' : 
+                          <Wallet sx={{ mr: 1, color:
+                            asset.name === 'USDC' ? '#2e7d32' :
                             asset.name === 'VND' ? '#757575' : '#1976d2'
                           }} />
                           <Typography variant="body1">{asset.name}</Typography>
@@ -390,9 +390,9 @@ const AssetManagementPage: React.FC = () => {
                       </TableCell>
                       <TableCell sx={{paddingLeft: 12}}>{asset.transactions}</TableCell>
                       <TableCell>
-                        <Chip 
-                          label={asset.status} 
-                          size="small" 
+                        <Chip
+                          label={asset.status}
+                          size="small"
                           color={getStatusColor(asset.status)}
                         />
                       </TableCell>
@@ -431,7 +431,7 @@ const AssetManagementPage: React.FC = () => {
                 sx={{ width: 250 }}
               />
             </Box>
-            
+
             {/* //Transactions tab */}
             <TableContainer>
               <Table sx={{ minWidth: 650 }}>
@@ -448,18 +448,18 @@ const AssetManagementPage: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {transactions.map((transaction) => (
-                    <TableRow 
+                    <TableRow
                       key={transaction.id}
-                      sx={{ 
-                        '&:last-child td, &:last-child th': { border: 0 },                       
+                      sx={{
+                        '&:last-child td, &:last-child th': { border: 0 },
                       }}
                     >
                      <TableCell>
-                        <Chip 
-                          icon={transaction.type.includes('withdrawal') ? <ArrowUpward /> : <ArrowDownward />} 
-                          label={transaction.type.replace('_', ' ')} 
+                        <Chip
+                          icon={transaction.type.includes('withdrawal') ? <ArrowUpward /> : <ArrowDownward />}
+                          label={transaction.type.replace('_', ' ')}
                           size="small"
-                          sx={{ 
+                          sx={{
                             backgroundColor: theme.palette.mode === 'dark' ? (
                               transaction.type.includes('deposit') ? chipBackgroundColors.deposit :
                               transaction.type.includes('withdrawal') ? chipBackgroundColors.withdrawal :
@@ -477,15 +477,15 @@ const AssetManagementPage: React.FC = () => {
                       <TableCell align="right">
                         <Typography
                           variant="body2"
-                          sx={{ 
-                            color: transaction.type.includes('withdrawal') || 
-                                  transaction.type.includes('gas') || 
-                                  transaction.type.includes('remove') ? 
+                          sx={{
+                            color: transaction.type.includes('withdrawal') ||
+                                  transaction.type.includes('gas') ||
+                                  transaction.type.includes('remove') ?
                                   '#d32f2f' : '#2e7d32'
                           }}
                         >
-                          {transaction.type.includes('withdrawal') || 
-                           transaction.type.includes('gas') || 
+                          {transaction.type.includes('withdrawal') ||
+                           transaction.type.includes('gas') ||
                            transaction.type.includes('remove') ? '-' : '+'}{formatCurrency(transaction.amount, transaction.asset)}
                         </Typography>
                       </TableCell>
@@ -494,9 +494,9 @@ const AssetManagementPage: React.FC = () => {
                         {new Date(transaction.timestamp).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        <Chip 
-                          label={transaction.status} 
-                          size="small" 
+                        <Chip
+                          label={transaction.status}
+                          size="small"
                           color={getStatusColor(transaction.status)}
                         />
                       </TableCell>
@@ -518,7 +518,7 @@ const AssetManagementPage: React.FC = () => {
               </Table>
             </TableContainer>
           </Box>
-        )}   
+        )}
       </Paper>
 
       {/* Transfer Dialog */}
@@ -530,14 +530,14 @@ const AssetManagementPage: React.FC = () => {
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               {/* Custom notification box instead of Alert */}
-              <Box sx={{ 
-                p: 2, 
-                mb: 2, 
-                borderRadius: 1, 
-                backgroundColor: '#e3f2fd', 
-                border: '1px solid #2196f3', 
-                display: 'flex', 
-                alignItems: 'center' 
+              <Box sx={{
+                p: 2,
+                mb: 2,
+                borderRadius: 1,
+                backgroundColor: '#e3f2fd',
+                border: '1px solid #2196f3',
+                display: 'flex',
+                alignItems: 'center'
               }}>
                 <Typography variant="body2">
                   You are transferring {selectedAsset?.name} from the bank's main wallet.
@@ -576,9 +576,9 @@ const AssetManagementPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleTransferClose} color="inherit">Cancel</Button>
-          <Button 
-            onClick={handleTransfer} 
-            color="primary" 
+          <Button
+            onClick={handleTransfer}
+            color="primary"
             variant="contained"
             disabled={!transferAmount || !transferAddress || isLoading}
             startIcon={isLoading ? <CircularProgress size={20} /> : <ArrowUpward />}
@@ -597,14 +597,14 @@ const AssetManagementPage: React.FC = () => {
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               {/* Custom warning box instead of Alert */}
-              <Box sx={{ 
-                p: 2, 
-                mb: 2, 
-                borderRadius: 1, 
-                backgroundColor: '#fff8e1', 
-                border: '1px solid #ffc107', 
-                display: 'flex', 
-                alignItems: 'center' 
+              <Box sx={{
+                p: 2,
+                mb: 2,
+                borderRadius: 1,
+                backgroundColor: '#fff8e1',
+                border: '1px solid #ffc107',
+                display: 'flex',
+                alignItems: 'center'
               }}>
                 <Warning sx={{ color: '#ffc107', mr: 1 }} />
                 <Typography variant="body2">
@@ -651,9 +651,9 @@ const AssetManagementPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleAdjustClose} color="inherit">Cancel</Button>
-          <Button 
-            onClick={handleAdjust} 
-            color="secondary" 
+          <Button
+            onClick={handleAdjust}
+            color="secondary"
             variant="contained"
             disabled={!adjustAmount || isLoading}
             startIcon={isLoading ? <CircularProgress size={20} /> : adjustType === 'add' ? <Add /> : <Remove />}
