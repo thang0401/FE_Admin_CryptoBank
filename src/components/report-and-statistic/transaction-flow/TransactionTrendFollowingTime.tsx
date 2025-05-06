@@ -4,6 +4,7 @@ import Card from '@mui/material/Card'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
+import React, { useState, useEffect } from "react"
 
 // ** Icon Import
 import Icon from 'src/@core/components/icon'
@@ -18,12 +19,43 @@ import ReactApexcharts from 'src/@core/components/react-apexcharts'
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
-const series = [{ data: [30, 58, 35, 53, 50, 68] }]
+const mockseries = [30, 58, 35, 53, 50, 68]
+
+interface TransactionTrendData {
+  month: number
+  totalAmount: number
+  growthPercentage: number
+  trendData: number[]
+}
 
 const TransactionTrendFollowingTime = () => {
   // ** Hook
   const theme = useTheme()
-
+  const [trendData, setTrendData] = useState<number[]>([]);
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await fetch('https://be-crypto-depot.name.vn/report-and-statistic/transaction-flow/usdc-buy-sell-ratio');
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data: TransactionTrendData = await response.json();
+          console.log(data)
+          // Update state with fetched data or fallback
+          setTrendData(data.trendData);
+          console.log("trendData:",trendData)
+        } catch (error) {
+          console.error('Error fetching USDC ratios:', error);
+          // Fallback to static data
+          setTrendData(mockseries);
+        }
+      };
+    
+      fetchData();
+    }, []);
+    const series: ApexAxisChartSeries = [
+      { data: trendData }
+    ];
   const options: ApexOptions = {
     chart: {
       parentHeightOffset: 0,

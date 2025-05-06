@@ -186,7 +186,7 @@ const TermManagement: React.FC = () => {
                 });
 
             if(response.ok){
-                setInterestRates((prev) => prev.filter((rate) => rate.id !== id))
+                setInterestRates((prev) => prev.filter((rate) => rate.deleted==true))
             }else{
 
             }
