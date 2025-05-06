@@ -50,30 +50,36 @@ import {
 import AddEmployeeDialog from "./AddEmployeeDialog";
 import EmployeeTable from "./EmployeeTable";
 import StatCard from "./StatCard";
-import { Employee, RoleConfig } from "src/types/employee-management/type";
+import { NewEmployee, Employee, RoleConfig } from "src/types/employee-management/type";
 import { useRouter } from "next/router";
 
 const ROLES: RoleConfig[] = [
-  { name: "Guest", icon: <HelpCircle size={20} />, color: "#9e9e9e" },
-  { name: "Admin", icon: <Shield size={20} />, color: "#f44336" },
-  { name: "Support", icon: <Megaphone size={20} />, color: "#2196f3" },
-  { name: "Auditor", icon: <ClipboardList size={20} />, color: "#ff9800" },
-  { name: "Customer", icon: <Users2 size={20} />, color: "#4caf50" },
-  { name: "Accountant", icon: <Calculator size={20} />, color: "#9c27b0" },
-  { name: "Compliance Officer", icon: <Scale size={20} />, color: "#795548" },
-  { name: "Trader", icon: <LineChart size={20} />, color: "#00bcd4" },
-  { name: "Financial Manager", icon: <Wallet size={20} />, color: "#3f51b5" },
-  { name: "Security Specialist", icon: <Lock size={20} />, color: "#607d8b" },
-  { name: "API Manager", icon: <Plug size={20} />, color: "#673ab7" },
-  { name: "Exchange Manager", icon: <Building2 size={20} />, color: "#009688" },
-  { name: "Developer", icon: <Code2 size={20} />, color: "#8bc34a" },
-  { name: "Affiliate Manager", icon: <Share2 size={20} />, color: "#ff5722" },
-  { name: "Marketing Manager", icon: <Megaphone size={20} />, color: "#e91e63" },
+  { id: "cvvvm5ari3unv50piep0", name: "Employee", icon: <Users2 size={20} />, color: "#4caf50" },
+  { id: "cvvvmdiri3unv50piev0", name: "Employee buys USDC", icon: <Megaphone size={20} />, color: "#2196f3" },
+  { id: "cvvvmf2ri3unv50pif20", name: "Employee sells USDC", icon: <Megaphone size={20} />, color: "#e91e63" },
+  { id: "cvvvlh2ri3unv50piej0", name: "Admin", icon: <Shield size={20} />, color: "#f44336" },
+  { id: "cvvvm82ri3unv50pies0", name: "Hiring Resource", icon: <ClipboardList size={20} />, color: "#ff9800" }
 ];
 
-const EMPLOYMENT_TYPES = ["Full-time", "Part-time", "Contract"];
-const MARITAL_STATUS = ["Single", "Married", "Divorced", "Widowed"];
-const EMPLOYEE_STATUS = ["Active", "Terminated", "Suspended"];
+const EMPLOYMENT_TYPES = [
+  { id: "d00070d7mbe1n8snrhp0", name: "Full-time" }, 
+  { id: "d000il57mbe1n8snrhpg", name: "Part-time" }, 
+  { id: "d0bkdellbt6lolst040g", name: "Contract" }
+];
+
+const MARITAL_STATUS = [
+  { id: "cvvvgfbme6nnaun2s4lg", name: "Single" },
+  { id: "cvvvghjme6nnaun2s4m0", name: "Married" },
+  { id: "cvvvgkjme6nnaun2s4mg", name: "Divorced" },
+  { id: "cvvvgnjme6nnaun2s4n0", name: "Unknown" }
+];
+
+const EMPLOYEE_STATUS = [
+  { id: "cvvvg2rme6nnaun2s4j0", name: "Active" },
+  { id: "cvvvga3me6nnaun2s4kg", name: "Terminated" },
+  { id: "cvvvg7rme6nnaun2s4k0", name: "Suspended" }
+];
+
 const BILLING_OPTIONS = ["Auto Debit", "Cash", "Bank Transfer", "Credit Card"];
 
 const getRoleConfig = (roleName: string): RoleConfig => {
@@ -95,17 +101,20 @@ const EmployeeManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [newEmployee, setNewEmployee] = useState<Employee>({
+  const [newEmployee, setNewEmployee] = useState<NewEmployee>({
     id: "",
     avatar: "",
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    email: "",
     username: "",
     password: "",
-    role: "",
+    role: "cvvvm5ari3unv50piep0",
     billing: "",
-    status: "Active",
-    employment_type: "Full-time",
-    marital_status: "Single",
+    status: "cvvvg2rme6nnaun2s4j0",
+    employment_type: "d00070d7mbe1n8snrhp0",
+    marital_status: "cvvvgfbme6nnaun2s4lg",
     hire_date: new Date().toISOString().split("T")[0],
     termination_date: null,
     salary: 0,
@@ -142,6 +151,7 @@ const EmployeeManagement = () => {
           id: employee.id,
           avatar: employee.avatar || "",
           name: employee.fullName || "",
+          email: employee.email || "",
           username: employee.username || "",
           password: employee.password || "",
           role: employee.role || "",
@@ -162,33 +172,6 @@ const EmployeeManagement = () => {
         }));
         setEmployees(formattedEmployees); // Giả sử server trả về mảng nhân viên
         setTotalRows(data.page.totalElements);
-              
-                // const mockData: Employee[] = [
-                //   {
-                //   id: "1",
-                //   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-                //   name: "Galen Slixby",
-                //   username: "gslixby0",
-                //   password: "",
-                //   role: "Editor",
-                //   billing: "Auto Debit",
-                //   status: "Active",
-                //   employment_type: "Full-time",
-                //   marital_status: "Single",
-                //   hire_date: "2023-01-15",
-                //   termination_date: null,
-                //   salary: 5000000,
-                //   bonus: 500000,
-                //   bank_account: "123456789",
-                //   bank_name: "VietcomBank",
-                //   insurance_number: "INS123456",
-                //   tax_code: "TAX123456",
-                //   emergency_contact_name: "Emergency Contact",
-                //   emergency_contact_phone: "0987654321",
-                // }
-                // ]
-        
-                // setEmployees(mockData);
       } catch (err) {
         // Ép kiểu err thành Error hoặc kiểm tra kiểu
         if (err instanceof Error) {
@@ -218,6 +201,7 @@ const EmployeeManagement = () => {
     setError(null);
 
     try {
+      console.log(newEmployee);
       const response = await fetch("https://be-crypto-depot.name.vn/api/employees", {
         method: "POST",
         headers: {
@@ -236,7 +220,10 @@ const EmployeeManagement = () => {
       setNewEmployee({
         id: "",
         avatar: "",
-        name: "",
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        email: "",
         username: "",
         password: "",
         role: "",
@@ -291,7 +278,7 @@ const EmployeeManagement = () => {
     setSelectedEmployees([]);
   };
 
-  const handleDeleteEmployee = (id: string) => {
+  const handleDeleteEmployee = async (id: string) => {
     setEmployees(employees.filter((employee) => employee.id !== id));
     setSelectedEmployees(selectedEmployees.filter((employeeId) => employeeId !== id));
   };
@@ -438,8 +425,8 @@ const EmployeeManagement = () => {
                 >
                   <MenuItem value="">All Statuses</MenuItem>
                   {EMPLOYEE_STATUS.map((status) => (
-                    <MenuItem key={status} value={status}>
-                      {status}
+                    <MenuItem key={status.id} value={status.name}>
+                      {status.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -532,7 +519,7 @@ const EmployeeManagement = () => {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={filteredEmployees.length}
+            count={totalRows}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}

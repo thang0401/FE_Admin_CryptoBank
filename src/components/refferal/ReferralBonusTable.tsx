@@ -19,44 +19,43 @@ import {
 } from "@mui/material"
 import { Eye, Trash2, MoreVertical, Edit } from "lucide-react"
 
-interface Employee {
-  id: string
-  avatar: string
-  name: string
-  username: string
-  role: string
-  billing: string
-  status: string
-  employment_type: string
-  hire_date: string
+interface ReferralBonus {
+  id: string;
+  bonusAmount: number;
+  status: string;
+  user: {
+    id: string;
+    avatar: string;
+    fullname: string;
+    email: string;
+  };
+  referralUser: {
+    id: string;
+    avatar: string;
+    fullname: string;
+    email: string;
+  };
 }
 
-interface RoleConfig {
-  name: string
-  icon: React.ReactNode
-  color: string
-}
 
-interface EmployeeTableProps {
-  employees: Employee[]
+interface ReferralBonusTableProps {
+  referralBonuses: ReferralBonus[]
   page: number
   rowsPerPage: number
-  selectedEmployees: string[]
-  handleSelectEmployee: (id: string, isViewDetails?: boolean) => void;
+  selectedReferralBonuses: string[]
+  handleSelectReferralBonus: (id: string, isViewDetails?: boolean) => void;
   handleSelectAll: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleDeleteEmployee: (id: string) => void
-  getRoleConfig: (roleName: string) => RoleConfig
+  handleDeleteReferralBonus: (id: string) => void
 }
 
-const EmployeeTable: React.FC<EmployeeTableProps> = ({
-  employees,
+const ReferralBonusTable: React.FC<ReferralBonusTableProps> = ({
+  referralBonuses,
   page,
   rowsPerPage,
-  selectedEmployees,
-  handleSelectEmployee,
+  selectedReferralBonuses,
+  handleSelectReferralBonus,
   handleSelectAll,
-  handleDeleteEmployee,
-  getRoleConfig,
+  handleDeleteReferralBonus,
 }) => {
   const theme = useTheme()
 
@@ -73,26 +72,13 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     }
   }
 
-  const getEmploymentTypeColor = (type: string) => {
-    switch (type) {
-      case "Full-time":
-        return theme.palette.primary.main
-      case "Part-time":
-        return theme.palette.secondary.main
-      case "Contract":
-        return theme.palette.info.main
-      default:
-        return theme.palette.text.secondary
-    }
-  }
-
   const formatDate = (dateString: string) => {
     if (!dateString) return ""
     const date = new Date(dateString)
     return date.toLocaleDateString("vi-VN")
   }
   
-  const displayedEmployees = employees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const displayedReferralBonuses = referralBonuses.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   return (
     <TableContainer>
@@ -101,34 +87,34 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           <TableRow>
             <TableCell padding="checkbox">
               <Checkbox
-                indeterminate={selectedEmployees.length > 0 && selectedEmployees.length < employees.length}
-                checked={employees.length > 0 && selectedEmployees.length === employees.length}
+                indeterminate={selectedReferralBonuses.length > 0 && selectedReferralBonuses.length < referralBonuses.length}
+                checked={referralBonuses.length > 0 && selectedReferralBonuses.length === referralBonuses.length}
                 onChange={handleSelectAll}
               />
             </TableCell>
-            <TableCell>Employee</TableCell>
-            <TableCell>Role</TableCell>
-            <TableCell>Employment Type</TableCell>
-            <TableCell>Hire Date</TableCell>
+            <TableCell>ID</TableCell>
+            <TableCell>User</TableCell>
+            <TableCell>Referral User</TableCell>
+            <TableCell>Bonus</TableCell>
             <TableCell>Status</TableCell>
             <TableCell align="right">Actions</TableCell>
           </TableRow>
         </TableHead>
 
         <TableBody>
-          {displayedEmployees.length === 0 ? (
+          {displayedReferralBonuses.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                 <Typography variant="body1" color="text.secondary">
-                  No employees found
+                  No referral bonus found
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
-            displayedEmployees.map((employee) => (
+            displayedReferralBonuses.map((referralBonus) => (
               <TableRow
-                key={employee.id}
-                selected={selectedEmployees.includes(employee.id)}
+                key={referralBonus.id}
+                selected={selectedReferralBonuses.includes(referralBonus.id)}
                 sx={{
                   "&:hover": {
                     backgroundColor: theme.palette.action.hover,
@@ -138,49 +124,50 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
               >
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={selectedEmployees.includes(employee.id)}
-                    onChange={() => handleSelectEmployee(employee.id)}
+                    checked={selectedReferralBonuses.includes(referralBonus.id)}
+                    onChange={() => handleSelectReferralBonus(referralBonus.id)}
                   />
                 </TableCell>
+                <TableCell>{referralBonus.id}</TableCell>
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    {employee.avatar ? (
-                      <Avatar src={employee.avatar} />
+                    {referralBonus.user.avatar ? (
+                      <Avatar src={referralBonus.user.avatar} />
                     ) : (
-                      <Avatar sx={{ bgcolor: theme.palette.primary.main }}>{employee.name.charAt(0)}</Avatar>
+                      <Avatar sx={{ bgcolor: theme.palette.primary.main }}>{referralBonus.user.fullname.charAt(0)}</Avatar>
                     )}
                     <Box>
                       <Typography variant="subtitle2" fontWeight="medium">
-                        {employee.name}
+                        {referralBonus.user.fullname}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {employee.username}
+                        {referralBonus.user.email}
                       </Typography>
                     </Box>
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box sx={{ color: getRoleConfig(employee.role).color }}>{getRoleConfig(employee.role).icon}</Box>
-                    <Typography variant="body2">{getRoleConfig(employee.role).name}</Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    {referralBonus.referralUser.avatar ? (
+                      <Avatar src={referralBonus.referralUser.avatar} />
+                    ) : (
+                      <Avatar sx={{ bgcolor: theme.palette.primary.main }}>{referralBonus.referralUser.fullname.charAt(0)}</Avatar>
+                    )}
+                    <Box>
+                      <Typography variant="body2" fontWeight="medium">
+                        {referralBonus.referralUser.fullname}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {referralBonus.referralUser.email}
+                      </Typography>
+                    </Box>
                   </Box>
                 </TableCell>
+                <TableCell>{referralBonus.bonusAmount}</TableCell>
                 <TableCell>
                   <Chip
-                    label={employee.employment_type}
-                    size="small"
-                    sx={{
-                      backgroundColor: `${getEmploymentTypeColor(employee.employment_type)}20`,
-                      color: getEmploymentTypeColor(employee.employment_type),
-                      fontWeight: "medium",
-                    }}
-                  />
-                </TableCell>
-                <TableCell>{formatDate(employee.hire_date)}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={employee.status}
-                    color={getStatusColor(employee.status) as any}
+                    label={referralBonus.status}
+                    color={getStatusColor(referralBonus.status) as any}
                     size="small"
                     sx={{ fontWeight: "medium" }}
                   />
@@ -191,7 +178,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       <IconButton 
                         size="small"
                         sx={{ color: theme.palette.primary.main }}
-                        onClick={() => handleSelectEmployee(employee.id, true)}
+                        onClick={() => handleSelectReferralBonus(referralBonus.id, true)}
                       >
                         <Eye size={18} />
                       </IconButton>
@@ -201,15 +188,15 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                         <Edit size={18} />
                       </IconButton>
                     </Tooltip> */}
-                    {/* <Tooltip title="Delete">
+                    <Tooltip title="Delete">
                       <IconButton
                         size="small"
                         sx={{ color: theme.palette.error.main }}
-                        onClick={() => handleDeleteEmployee(employee.id)}
+                        onClick={() => handleDeleteReferralBonus(referralBonus.id)}
                       >
                         <Trash2 size={18} />
                       </IconButton>
-                    </Tooltip> */}
+                    </Tooltip>
                     {/* <Tooltip title="More Options">
                       <IconButton size="small">
                         <MoreVertical size={18} />
@@ -226,4 +213,4 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   )
 }
 
-export default EmployeeTable
+export default ReferralBonusTable
