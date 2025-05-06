@@ -23,18 +23,27 @@ import {
 } from "@mui/material";
 import { X } from "lucide-react";
 import { SelectChangeEvent } from "@mui/material";
-import { Employee, RoleConfig } from "src/types/employee-management/type";
+import { NewEmployee, Employee, RoleConfig } from "src/types/employee-management/type";
 
 interface AddEmployeeDialogProps {
   open: boolean;
   onClose: () => void;
-  newEmployee: Employee;
-  setNewEmployee: React.Dispatch<React.SetStateAction<Employee>>;
+  newEmployee: NewEmployee;
+  setNewEmployee: React.Dispatch<React.SetStateAction<NewEmployee>>;
   handleAddEmployee: () => void;
   roles: RoleConfig[];
-  employmentTypes: string[];
-  maritalStatus: string[];
-  employeeStatus: string[];
+  employmentTypes: {
+    id: string;
+    name: string;
+  }[];
+  maritalStatus: {
+    id: string;
+    name: string;
+  }[];
+  employeeStatus: {
+    id: string;
+    name: string;
+  }[];
   billingOptions: string[];
   loading: boolean; // Thêm prop để hiển thị trạng thái loading
 }
@@ -127,9 +136,31 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Full Name"
-                    name="name"
-                    value={newEmployee.name}
+                    label="First Name"
+                    name="firstName"
+                    value={newEmployee.firstName}
+                    onChange={handleTextFieldChange}
+                    required
+                    disabled={loading}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Last Name"
+                    name="lastName"
+                    value={newEmployee.lastName}
+                    onChange={handleTextFieldChange}
+                    required
+                    disabled={loading}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    value={newEmployee.email}
                     onChange={handleTextFieldChange}
                     required
                     disabled={loading}
@@ -170,7 +201,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                       disabled={loading}
                     >
                       {roles.map((role) => (
-                        <MenuItem key={role.name} value={role.name}>
+                        <MenuItem key={role.id} value={role.id}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                             <Box sx={{ color: role.color }}>{role.icon}</Box>
                             {role.name}
@@ -194,15 +225,15 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                     <InputLabel>Employment Type</InputLabel>
                     <Select
                       name="employment_type"
-                      value={newEmployee.employment_type}
+                      value={newEmployee.employment_type || "Full-time"}
                       label="Employment Type"
                       onChange={handleSelectChange}
                       required
                       disabled={loading}
                     >
                       {employmentTypes.map((type) => (
-                        <MenuItem key={type} value={type}>
-                          {type}
+                        <MenuItem key={type.id} value={type.id}>
+                          {type.name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -213,15 +244,15 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                     <InputLabel>Status</InputLabel>
                     <Select
                       name="status"
-                      value={newEmployee.status}
+                      value={newEmployee.status || "Active"}
                       label="Status"
                       onChange={handleSelectChange}
                       required
                       disabled={loading}
                     >
                       {employeeStatus.map((status) => (
-                        <MenuItem key={status} value={status}>
-                          {status}
+                        <MenuItem key={status.id} value={status.id}>
+                          {status.name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -314,15 +345,15 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                     <InputLabel>Marital Status</InputLabel>
                     <Select
                       name="marital_status"
-                      value={newEmployee.marital_status}
+                      value={newEmployee.marital_status || "cvvvgfbme6nnaun2s4lg"}
                       label="Marital Status"
                       onChange={handleSelectChange}
                       required
                       disabled={loading}
                     >
                       {maritalStatus.map((status) => (
-                        <MenuItem key={status} value={status}>
-                          {status}
+                        <MenuItem key={status.id} value={status.id}>
+                          {status.name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -421,7 +452,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
         <Button
           onClick={handleAddEmployee}
           variant="contained"
-          disabled={!newEmployee.name || !newEmployee.username || !newEmployee.role || loading}
+          disabled={!newEmployee.firstName || !newEmployee.lastName || !newEmployee.username || !newEmployee.role || loading}
           startIcon={loading ? <CircularProgress size={18} /> : null}
         >
           Add Employee
