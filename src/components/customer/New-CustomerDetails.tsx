@@ -325,7 +325,7 @@ const CustomerDetails: React.FC = () => {
     );
   }
 
-  const isKycPending = !customer.kycStatus && customer.status === null;
+  const isKycPending = !customer.kycStatus && customer.status === null || customer.status === 'Pending'
   const isKycApproved = customer.kycStatus;
   const isKycRejected = !customer.kycStatus && customer.status === "Rejected";
 
